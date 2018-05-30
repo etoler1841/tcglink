@@ -54,7 +54,7 @@
           } else {
             $return['status'] = 'ok';
             $ch = curl_init();
-            curl_setopt($ch, CURLOPT_URL, "http://www.pricebustersgames.com/pbadmin/tcglink/update_item.php?prodId=".$data['prodId']);
+            curl_setopt($ch, CURLOPT_URL, "./update_item.php?prodId=".$data['prodId']);
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
             $curlRes = json_decode(curl_exec($ch));
             if($curlRes->errors){
@@ -78,7 +78,7 @@
       } else {
         $return['status'] = 'ok';
         $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, "http://www.pricebustersgames.com/pbadmin/tcglink/update_item.php?prodId=".$data['prodId']);
+        curl_setopt($ch, CURLOPT_URL, "./update_item.php?prodId=".$data['prodId']);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         $curlRes = json_decode(curl_exec($ch));
         if($curlRes->errors){

@@ -44,7 +44,7 @@
         $return['card']['prodName'] = $row['products_name'].' ['.$row['pb_code'].']';
         if(strtotime($row['foil_last_update']) < strtotime("6 hours ago")){
           $ch = curl_init();
-          curl_setopt($ch, CURLOPT_URL, "http://www.pricebustersgames.com/pbadmin/tcglink/update_item.php?prodId=".$data['prodId']);
+          curl_setopt($ch, CURLOPT_URL, "$path/update_item.php?prodId=".$data['prodId']);
           curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
           $curlRes = json_decode(curl_exec($ch));
           $return['card']['price'] = number_format($curlRes->new_price, 2);
