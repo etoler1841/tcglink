@@ -54,7 +54,7 @@
           } else {
             $return['status'] = 'ok';
             $ch = curl_init();
-            curl_setopt($ch, CURLOPT_URL, "./update_item.php?prodId=".$data['prodId']);
+            curl_setopt($ch, CURLOPT_URL, "$path/update_item.php?prodId=".$data['prodId']);
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
             $curlRes = json_decode(curl_exec($ch));
             if($curlRes->errors){
@@ -65,7 +65,19 @@
             }
           }
           break;
-        }
+        case 'price':
+          $ch = curl_init();
+          curl_setopt($ch, CURLOPT_URL, "$path/update_item.php?prodId=".$data['prodId']);
+          curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+          $curlRes = json_decode(curl_exec($ch));
+          if($curlRes->errors){
+            $return['status'] = 'err';
+            $return['errors']['curl'] = $curlRes->errors;
+          } else {
+            $return['status'] = 'ok';
+            $return['new_price'] = number_format($curlRes->new_price, 2);
+          }
+      }
       break;
     case 'foil':
       $stmt = "UPDATE mtg_card_link
@@ -78,7 +90,7 @@
       } else {
         $return['status'] = 'ok';
         $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, "./update_item.php?prodId=".$data['prodId']);
+        curl_setopt($ch, CURLOPT_URL, "$path/update_item.php?prodId=".$data['prodId']);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         $curlRes = json_decode(curl_exec($ch));
         if($curlRes->errors){

@@ -235,6 +235,21 @@
       background-color: #6ee;
     }
 
+    .save-btn {
+      position: fixed;
+      bottom: 15px;
+      right: 15px;
+      width: 125px;
+      height: 50px;
+      background-color: #cfc;
+      border: solid 1px #9f9;
+      border-radius: 2px;
+    }
+
+    .save-btn:hover {
+      background-color: #9f9;
+    }
+
     input[type=number] {
       width: 50px;
     }
@@ -312,7 +327,7 @@
 
     #progress-bar {
       height: 20px;
-      width: 50%;
+      width: 0;
       background-color: #3f3;
       border-radius: 5px;
       position: relative;
@@ -330,7 +345,7 @@
   <div id='modal-bg'></div>
   <div id='progress'>
     <p>Saving...</p>
-    <span id='progress-num'>0/255</span>
+    <span id='progress-num'>0/0</span>
     <div id='progress-bar-container'><div id='progress-bar'></div></div>
   </div>
   <div id='container'>
@@ -422,7 +437,7 @@
             </tbody>
             <tfoot>
               <tr>
-                <td colspan='<?=7+sizeof($data['cards'][0]['qty'])?>'><button id='save'>Save changes</button></td>
+                <td colspan='<?=7+sizeof($data['cards'][0]['qty'])?>'><button id='save' class='save-btn'>Save changes</button></td>
               </tr>
             </tfoot>
           </table>
@@ -432,71 +447,14 @@
   </div>
 </body>
 <script>
-  $("#search").keyup((e) => {
-    if(e.which == 13){
-      $("#searchSubmit").click();
-    }
+  $(window).load(() => {
+    $("#note").css("left", ($("#search").position().left-250)+"px");
+    $("#note").css("top", ($("#search").position().top-5)+"px");
   });
 
-  $("#setSubmit").click(() => {
-    let val = $("#setSelect").val();
-    window.location.href = "?set="+val;
-  });
-
-  $("#searchSubmit").click(() => {
-    let val = $("#search").val();
-    window.location.href = "?search="+val;
-  });
-
-  $("#cardData img").mouseover((e) => {
-    let img = $(e.currentTarget).attr("src");
-    console.log(img);
-    $("#img-div").html("<img src='"+img+"' />")
-  });
-
-  $("#cardData img").mouseout((e) => {
-    $("#img-div").html("");
-  });
-
-  $("#cardData tbody input").keyup((e) => {
-    if(e.which == 13){
-      $("#save").click();
-    }
-  });
-
-  $("#save").click(() => {
-    $("#save").attr("id", "");
-    $("#modal-bg").show();
-    $("#progress").css("display", "flex");
-    let rows = $("#cardData tbody tr");
-    let j = 0;
-    for(let i = 0, n = rows.length; i < n; i++){
-      let qty = $(rows[i]).children(".qty").children("input").val();
-      if(qty != ''){
-        j++;
-        $("#progress-num").html("0/"+j);
-      }
-    }
-    let k = 0;
-    for(let i = 0, n = rows.length; i < n; i++){
-      let qty = $(rows[i]).children(".qty").children("input").val();
-      if(qty != ''){
-        let prodId = $(rows[i]).attr("id");
-        let params = {
-          'method': 'addQty',
-          'prodId': prodId,
-          'qty': qty
-        };
-        $.post("./load_ajax.php", JSON.stringify(params), () => {
-          k++;
-          $("#progress-num").html(k+"/"+j);
-          $("#progress-bar").width(k*100/j+"%");
-        });
-      }
-    }
-    $(document).ajaxStop(() => {
-      window.location.href = "?";
-    });
+  $(window).resize(() => {
+    $("#note").css("left", ($("#search").position().left-250)+"px");
+    $("#note").css("top", ($("#search").position().top-5)+"px");
   });
 
   $("body").on("click", ".click-edit", (e) => {
@@ -528,6 +486,97 @@
     });
   });
 
+  $("body").on("blur", ".qty input", (e) => {
+    if($(e.currentTarget).val() <= 0 || $(e.currentTarget).val() == ''){
+      return;
+    }
+    let id = $(e.currentTarget).parent().parent().attr("id");
+    let params = {
+      'method': 'update',
+      'prop': 'price',
+      'prodId': id,
+    };
+    $.post("./load_ajax.php", JSON.stringify(params), (response) => {
+      let data = JSON.parse(response);
+      console.info(data);
+      if(!data.errors){
+        $(e.currentTarget).parent().siblings(".price").html("$"+data.new_price).removeClass("new old ancient").addClass("new");
+      } else {
+        console.info(data.errors);
+      }
+    });
+  });
+
+  $("#cardData img").mouseover((e) => {
+    let img = $(e.currentTarget).attr("src");
+    console.log(img);
+    $("#img-div").html("<img src='"+img+"' />")
+  });
+
+  $("#cardData img").mouseout((e) => {
+    $("#img-div").html("");
+  });
+
+  $("#cardData tbody input").keyup((e) => {
+    if(e.which == 13){
+      $("#save").click();
+    }
+  });
+
+  $("#save").click(() => {
+    $("#save").attr("id", "");
+    $("#modal-bg").show();
+    $("#progress").css("display", "flex");
+    let rows = $("#cardData tbody tr");
+    let j = 0;
+    for(let i = 0, n = rows.length; i < n; i++){
+      let qty = $(rows[i]).children(".qty").children("input").val();
+      if(qty != ''){
+        j++;
+        $("#progress-num").html("0/"+j);
+      }
+    }
+    if(j == 0){
+      window.location.href = "?";
+    }
+    let k = 0;
+    for(let i = 0, n = rows.length; i < n; i++){
+      let qty = $(rows[i]).children(".qty").children("input").val();
+      if(qty != ''){
+        let prodId = $(rows[i]).attr("id");
+        let params = {
+          'method': 'addQty',
+          'prodId': prodId,
+          'qty': qty
+        };
+        $.post("./load_ajax.php", JSON.stringify(params), () => {
+          k++;
+          $("#progress-num").html(k+"/"+j);
+          $("#progress-bar").width(k*100/j+"%");
+        });
+      }
+    }
+    $(document).ajaxStop(() => {
+      window.location.href = "?";
+    });
+  });
+
+  $("#search").keyup((e) => {
+    if(e.which == 13){
+      $("#searchSubmit").click();
+    }
+  });
+
+  $("#searchSubmit").click(() => {
+    let val = $("#search").val();
+    window.location.href = "?search="+val;
+  });
+
+  $("#setSubmit").click(() => {
+    let val = $("#setSelect").val();
+    window.location.href = "?set="+val;
+  });
+
   $(".foil-status").change((e) => {
     let val = $(e.currentTarget).val();
     let id = $(e.currentTarget).parent().parent().attr("id");
@@ -553,15 +602,5 @@
     let id = $(e.currentTarget).parent().parent().attr("id");
     let qty = $(e.currentTarget).parent().siblings(".qty").children("input").val();
     printMTGLabel(text, id, qty);
-  });
-
-  $(window).load(() => {
-    $("#note").css("left", ($("#search").position().left-250)+"px");
-    $("#note").css("top", ($("#search").position().top-5)+"px");
-  });
-
-  $(window).resize(() => {
-    $("#note").css("left", ($("#search").position().left-250)+"px");
-    $("#note").css("top", ($("#search").position().top-5)+"px");
   });
 </script>
