@@ -122,15 +122,16 @@
       overflow-y: auto;
       background-color: white;
       margin-top: 0;
+      display: none;
     }
 
     #search-results .search-result {
       display: flex;
       flex-wrap: wrap;
       align-items: center;
-      align-items: stretch;
+      align-content: stretch;
       padding: 10px;
-      height: 50px;
+      height: 25px;
       width: auto;
       border-bottom: solid 1px #999;
     }
@@ -186,11 +187,6 @@
       <div id='search'>
         <input type='text' size='50' id='search-field' placeholder='Start typing...' />
         <div id='search-results'>
-          <div class='search-result'><p>No results</p></div>
-          <div class='search-result'><p>No results</p></div>
-          <div class='search-result'><p>No results</p></div>
-          <div class='search-result'><p>No results</p></div>
-          <div class='search-result'><p>No results</p></div>
           <div class='search-result'><p>No results</p></div>
         </div>
       </div>
@@ -363,6 +359,73 @@
         $(elem).parent().parent().remove();
       }
       updateTotals();
+    });
+
+    $("#search-field").keyup((e) => {
+      let str = $("#search-field").val();
+      if(str.length >= 3){
+        let params = {
+          'method': 'search',
+          'str': str
+        };
+        $.post("./buy_ajax.php", JSON.stringify(params), (response) => {
+          let data = JSON.parse(response);
+          if(data.cards.length == 0){
+            $("#search-results").html(`
+              <div class='search-result'><p>No results</p></div>
+            `);
+            $("#search-results").hide();
+          } else {
+            $("#search-results").show();
+            $("#search-results").html('');
+            for(card of data.cards){
+              $("#search-results").append(`
+                <div class="search-result" id="res_${card.prodId}">
+                  <img src="../../images/${card.image}" alt="" />
+                  <span class="card-name">${card.prodName} [${card.setCode}]</span>
+                </div>
+              `);
+            }
+          }
+        })
+      }
+    });
+
+    $("body").on("click", "#search-results .search-result", (e) => {
+      let prod = e.currentTarget;
+      let prodId = $(prod).attr("id").replace("res_", "");
+      if($("#"+prodId).length > 0){
+        let field = $("#"+prodId+" .qty input");
+        field.val(parseInt(field.val())+1);
+        updateTotals();
+      } else {
+        let params = {
+          'method': 'cardSelect',
+          'prodId': prodId
+        };
+        $.post("./buy_ajax.php", JSON.stringify(params), (response) => {
+          let data = JSON.parse(response);
+          if(data.errors){
+            console.info(data.errors);
+          } else {
+            $("#products tbody").append(`
+              <tr id='${data.card.prodId}' class=${data.card.foilStatus}>
+                <td class='qty'><input type='number' value='1' /></td>
+                <td class='image'><img src='../../images/${data.card.prodImage}' /></td>
+                <td class='name'>${data.card.prodName}</td>
+                <td class='price'>$${data.card.price}</td>
+                <td class='current-qty'>${data.card.currentQty}</td>
+              </tr>
+            `);
+          }
+        });
+        updateTotals();
+      }
+      $("#search-results").html(`
+        <div class='search-result'><p>No results</p></div>
+      `);
+      $("#search-results").hide();
+      $("#search-field").val('');
     });
   </script>
 </body>
