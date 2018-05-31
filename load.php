@@ -470,7 +470,7 @@
           let card = data.card;
           $("#"+id).after(`
             <tr id='${card.prodId}' class='${card.showcaseStatus} foil'>
-              <td><img src='${card.prodImg}' /></td>
+              <td><img src='../../images/${card.prodImg}' /></td>
               <td class='tcgpId'><span class='click-edit'>${card.tcgpId}</span></td>
               <td>
                 <select class='foil-status' tabindex='-1'>
