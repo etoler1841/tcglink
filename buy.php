@@ -263,9 +263,9 @@
           $("#search-results").html('');
           for(card of data.cards){
             $("#search-results").append(`
-              <div class="search-result" id="res_${card.prodId}">
-                <img src="../../images/${card.prodImg}" alt="" />
-                <span class="card-name">${card.prodName} [${card.setCode}]</span>
+              <div class='search-result' id='res_${card.prodId}'>
+                <img src='../../images/${card.prodImg}' alt=' />
+                <span class='card-name'>${card.prodName} [${card.setCode}]</span>
               </div>
             `);
           }
@@ -378,7 +378,7 @@
     $("body").on("mouseover", ".search-result", (e) => {
       $(".highlight").removeClass("highlight");
       $(e.currentTarget).addClass("highlight");
-      $("#img-div").html("<img src='"+$(e.currentTarget).children("img").attr("src")+"' />");
+      $("#img-div").html("<img src='"+$(e.currentTarget).children("img").attr("src")+"' alt='' />");
     });
 
     $("#card-add").click(() => {
@@ -389,7 +389,7 @@
     $("#products").on("mouseover", ".image img", (e) => {
       let img = $(e.currentTarget).attr("src");
       $("#img-div").show();
-      $("#img-div").html("<img src='"+$(e.currentTarget).children("img").attr("src")+"' />");
+      $("#img-div").html("<img src='"+$(e.currentTarget).attr("src")+"' alt='' />");
     });
 
     $("#products").on("mouseout", ".image img", (e) => {
@@ -435,7 +435,11 @@
               }
             }
           }
+<<<<<<< HEAD
           $("#img-div").html("<img src='"+$(".highlight").children("img").attr("src")+"' />").show();
+=======
+          $("#img-div").html("<img src='"+$(".highlight").children("img").attr("src")+"' alt='' />").show();
+>>>>>>> buylist-search
           break;
         case 38:
           //up arrow
@@ -455,7 +459,11 @@
               break;
             }
           }
+<<<<<<< HEAD
           $("#img-div").html("<img src='"+$(".highlight").children("img").attr("src")+"' />").show();
+=======
+          $("#img-div").html("<img src='"+$(".highlight").children("img").attr("src")+"' alt='' />").show();
+>>>>>>> buylist-search
           break;
       case 13:
         //enter
