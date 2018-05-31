@@ -22,6 +22,10 @@
       font-size: .95em;
     }
 
+    div {
+      padding: 15px;
+    }
+
     table {
       display: inline-table;
       margin: 20px;
@@ -43,8 +47,12 @@
       padding: 5px;
     }
 
-    div {
-      padding: 15px;
+    tr.foil {
+      background-color: #ddd;
+    }
+
+    tr.normal {
+      background-color: white;
     }
 
     .qty > input {
@@ -55,12 +63,12 @@
       background-color: #f99;
     }
 
-    #products img {
-      height: 35px;
-    }
-
-    #products tr {
-      border-bottom: solid 1px #666;
+    #container, #finder {
+      display: flex;
+      flex-flow: column nowrap;
+      justify-content: flex-start;
+      align-items: center;
+      align-content: center;
     }
 
     #img-div {
@@ -76,24 +84,12 @@
       height: 100%;
     }
 
-    #container, #finder {
-      display: flex;
-      flex-flow: column nowrap;
-      justify-content: flex-start;
-      align-items: center;
-      align-content: center;
+    #products img {
+      height: 35px;
     }
 
-    #totals, #add-ins {
-      display: flex;
-      flex-flow: row nowrap;
-      justify-content: space-evenly;
-      align-items: stretch;
-      align-content: flex-start;
-    }
-
-    #totals, #add-ins, #finder {
-      width: 100%;
+    #products tr {
+      border-bottom: solid 1px #666;
     }
 
     #products table .qty {
@@ -116,12 +112,43 @@
       width: 15%;
     }
 
-    tr.foil {
-      background-color: #ddd;
+    #search-results {
+      padding: 0px;
+      border: 1px solid #333;
+      box-shadow: 2px 2px 10px #666;
+      width: 380px;
+      max-height: 250px;
+      overflow-x: hidden;
+      overflow-y: auto;
+      background-color: white;
+      margin-top: 0;
     }
 
-    tr.normal {
-      background-color: white;
+    #search-results .search-result {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      align-items: stretch;
+      padding: 10px;
+      height: 50px;
+      width: auto;
+      border-bottom: solid 1px #999;
+    }
+
+    #search-results .search-result:hover {
+      background-color: #eff;
+    }
+
+    #totals, #add-ins {
+      display: flex;
+      flex-flow: row nowrap;
+      justify-content: space-evenly;
+      align-items: stretch;
+      align-content: flex-start;
+    }
+
+    #totals, #add-ins, #finder {
+      width: 100%;
     }
 
   </style>
@@ -154,6 +181,18 @@
           <option value=''>Please select a set</option>
         </select>
         <button id='card-add'>Add</button>
+      </div>
+      <p><strong>- OR -</strong></p>
+      <div id='search'>
+        <input type='text' size='50' id='search-field' placeholder='Start typing...' />
+        <div id='search-results'>
+          <div class='search-result'><p>No results</p></div>
+          <div class='search-result'><p>No results</p></div>
+          <div class='search-result'><p>No results</p></div>
+          <div class='search-result'><p>No results</p></div>
+          <div class='search-result'><p>No results</p></div>
+          <div class='search-result'><p>No results</p></div>
+        </div>
       </div>
     </div>
     <div id='products'>
