@@ -152,11 +152,11 @@
         $return['error'] = $conn->error;
         exit(json_encode($return));
       }
-      curl_setopt($ch, CURLOPT_URL, "http://www.pricebustersgames.com/pbadmin/tcglink/update_item.php?prodId=".$prodId);
+      curl_setopt($ch, CURLOPT_URL, "$path/update_item.php?prodId=".$prodId);
       curl_exec($ch);
       if($foil && $normal){
         $cardName = $conn->real_escape_string($card->productName.' - Foil');
-        $model = substr($setCode.'-'.$altName, 0, 27).'-Foil';
+        $model = str_replace("--", "-", substr($setCode.'-'.$altName, 0, 27).'-Foil');
         $stmt = "SELECT 1
                  FROM products p
                  LEFT JOIN products_description pd ON p.products_id = pd.products_id
@@ -182,6 +182,7 @@
                      manufacturers_id = 0,
                      products_quantity_mixed = 1,
                      master_categories_id = $catId,
+                     products_full_name = '$cardName',
                      img_update = 1";
         $conn->query($stmt);
         if($conn->error){
@@ -221,7 +222,7 @@
           $return['error'] = $conn->error;
           exit(json_encode($return));
         }
-        curl_setopt($ch, CURLOPT_URL, "http://www.pricebustersgames.com/pbadmin/tcglink/update_item.php?prodId=".$prodId);
+        curl_setopt($ch, CURLOPT_URL, "$path/update_item.php?prodId=".$prodId);
         curl_exec($ch);
       }
 
