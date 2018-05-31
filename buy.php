@@ -142,6 +142,7 @@
       height: 100%;
       width: auto;
       float: left;
+      margin-right: 5px;
     }
 
     #search-results .search-result.highlight {
@@ -262,9 +263,9 @@
           $("#search-results").html('');
           for(card of data.cards){
             $("#search-results").append(`
-              <div class="search-result" id="res_${card.prodId}">
-                <img src="../../images/${card.prodImg}" alt="" />
-                <span class="card-name">${card.prodName} [${card.setCode}]</span>
+              <div class='search-result' id='res_${card.prodId}'>
+                <img src='../../images/${card.prodImg}' alt=' />
+                <span class='card-name'>${card.prodName} [${card.setCode}]</span>
               </div>
             `);
           }
@@ -372,12 +373,13 @@
       let prodId = $(prod).attr("id").replace("res_", "");
       addItem(prodId);
       $("#search-results").hide();
+      $("#img-div").hide();
     });
 
     $("body").on("mouseover", ".search-result", (e) => {
       $(".highlight").removeClass("highlight");
       $(e.currentTarget).addClass("highlight");
-      $("#img-div").html("<img src='"+$(e.currentTarget).children("img").attr("src")+"' />");
+      $("#img-div").html("<img src='"+$(e.currentTarget).children("img").attr("src")+"' alt='' />");
     });
 
     $("#card-add").click(() => {
@@ -388,7 +390,7 @@
     $("#products").on("mouseover", ".image img", (e) => {
       let img = $(e.currentTarget).attr("src");
       $("#img-div").show();
-      $("#img-div").html("<img src='"+$(e.currentTarget).children("img").attr("src")+"' />");
+      $("#img-div").html("<img src='"+$(e.currentTarget).attr("src")+"' alt='' />");
     });
 
     $("#products").on("mouseout", ".image img", (e) => {
@@ -420,7 +422,6 @@
                 if(j+1 < items.length){
                   $(items[j]).removeClass("highlight");
                   $(items[j+1]).addClass("highlight");
-                  console.log($(".highlight").position().top);
                   let height = $(items[1]).position().top-$(items[0]).position().top;
                   if($(".highlight").position().top > ($(box).position().top+$(box).height()-height)){
                     let top = ((j+1)*height);
@@ -435,7 +436,7 @@
               }
             }
           }
-          $("#img-div").attr("src", $(".highlight").children("img").attr("src")).show();
+          $("#img-div").html("<img src='"+$(".highlight").children("img").attr("src")+"' alt='' />").show();
           break;
         case 38:
           //up arrow
@@ -455,7 +456,7 @@
               break;
             }
           }
-          $("#img-div").attr("src", $(".highlight").children("img").attr("src")).show();
+          $("#img-div").html("<img src='"+$(".highlight").children("img").attr("src")+"' alt='' />").show();
           break;
       case 13:
         //enter
