@@ -169,6 +169,13 @@
       <span class='add-in'>Non-standard rares <input type='text' id='ns-rare-qty' size='3' /></span>
     </div>
     <div id='finder'>
+      <div id='search'>
+        <input type='text' size='50' id='search-field' placeholder='Start typing...' />
+        <div id='search-results'>
+          <div class='search-result'><p>No results</p></div>
+        </div>
+      </div>
+      <p><strong>- OR -</strong></p>
       <div>
         <select id='set-select'>
           <option value=''>Choose...</option>
@@ -182,13 +189,6 @@
           <option value=''>Please select a set</option>
         </select>
         <button id='card-add'>Add</button>
-      </div>
-      <p><strong>- OR -</strong></p>
-      <div id='search'>
-        <input type='text' size='50' id='search-field' placeholder='Start typing...' />
-        <div id='search-results'>
-          <div class='search-result'><p>No results</p></div>
-        </div>
       </div>
     </div>
     <div id='products'>
@@ -207,6 +207,36 @@
     </div>
   </div>
   <script>
+    //functions
+    function addItem(prodId) {
+      if($("#"+prodId).length > 0){
+        let field = $("#"+prodId+" .qty input");
+        field.val(parseInt(field.val())+1);
+      } else {
+        let params = {
+          'method': 'cardSelect',
+          'prodId': prodId
+        };
+        $.post("./buy_ajax.php", JSON.stringify(params), (response) => {
+          let data = JSON.parse(response);
+          if(data.errors){
+            console.info(data.errors);
+          } else {
+            $("#products tbody").append(`
+              <tr id='${data.card.prodId}' class=${data.card.foilStatus}>
+                <td class='qty'><input type='number' value='1' /></td>
+                <td class='image'><img src='../../images/${data.card.prodImage}' /></td>
+                <td class='name'>${data.card.prodName}</td>
+                <td class='price'>$${data.card.price}</td>
+                <td class='current-qty'>${data.card.currentQty}</td>
+              </tr>
+            `);
+          }
+        });
+      }
+      updateTotals();
+    }
+
     function updateTotals(){
       let total = singles = storeCredit = cash = 0;
       let addIns = $("#add-ins input");
@@ -280,67 +310,9 @@
       $("#cash-amt").html("$"+(Math.round(cash*100)/100).toFixed(2));
     }
 
-    $("#set-select").change(() => {
-      let params = {
-        'method': 'setSelect',
-        'catId': $("#set-select").val()
-      };
-      $.post("./buy_ajax.php", JSON.stringify(params), (response) => {
-        let data = JSON.parse(response);
-        if(data.errors){
-          console.info(data.errors);
-        } else {
-          $("#card-select").html("<option value=''>Choose...</option>");
-          for(let i = 0, n = data.cards.length; i < n; i++){
-            $("#card-select").append(`<option value='${data.cards[i].prodId}'>${data.cards[i].prodName}</option>`);
-          }
-        }
-      });
-    });
-
-    $("#card-add").click(() => {
-      let prodId = $("#card-select").val();
-      if($("#"+prodId).length > 0){
-        let field = $("#"+prodId+" .qty input");
-        field.val(parseInt(field.val())+1);
-        updateTotals();
-      } else {
-        let params = {
-          'method': 'cardSelect',
-          'prodId': $("#card-select").val()
-        };
-        $.post("./buy_ajax.php", JSON.stringify(params), (response) => {
-          console.log(response);
-          let data = JSON.parse(response);
-          if(data.errors){
-            console.info(data.errors);
-          } else {
-            $("#products tbody").append(`
-              <tr id='${data.card.prodId}' class=${data.card.foilStatus}>
-                <td class='qty'><input type='number' value='1' /></td>
-                <td class='image'><img src='../../images/${data.card.prodImage}' /></td>
-                <td class='name'>${data.card.prodName}</td>
-                <td class='price'>$${data.card.price}</td>
-                <td class='current-qty'>${data.card.currentQty}</td>
-              </tr>
-            `);
-            updateTotals();
-          }
-        });
-      }
-    });
-
-    $("#products").on("mouseover", ".image img", (e) => {
-      let img = $(e.currentTarget).attr("src");
-      $("#img-div").html("<img src='"+img+"' />");
-    });
-
-    $("#products").on("mouseout", ".image img", (e) => {
-      $("#img-div").html("");
-    });
-
-    $("body").on("click", "input", (e) => {
-      $(e.currentTarget).select();
+    //listeners
+    $(document).ready(() => {
+      $("#search-field").focus();
     });
 
     $("#add-ins input").keyup((e) => {
@@ -351,6 +323,35 @@
         $(elem).removeClass("warning");
       }
       updateTotals();
+    });
+
+    $("body").on("click", "input", (e) => {
+      $(e.currentTarget).select();
+    });
+
+    $("body").on("click", "#search-results .search-result", (e) => {
+      let prod = e.currentTarget;
+      let prodId = $(prod).attr("id").replace("res_", "");
+      addItem(prodId);
+      // $("#search-results").html(`
+      //   <div class='search-result'><p>No results</p></div>
+      // `);
+      $("#search-results").hide();
+      $("#search-field").val('');
+    });
+
+    $("#card-add").click(() => {
+      let prodId = $("#card-select").val();
+      addItem(prodId);
+    });
+
+    $("#products").on("mouseover", ".image img", (e) => {
+      let img = $(e.currentTarget).attr("src");
+      $("#img-div").html("<img src='"+img+"' />");
+    });
+
+    $("#products").on("mouseout", ".image img", (e) => {
+      $("#img-div").html("");
     });
 
     $("#products").on("change keyup click", ".qty input", (e) => {
@@ -391,41 +392,22 @@
       }
     });
 
-    $("body").on("click", "#search-results .search-result", (e) => {
-      let prod = e.currentTarget;
-      let prodId = $(prod).attr("id").replace("res_", "");
-      if($("#"+prodId).length > 0){
-        let field = $("#"+prodId+" .qty input");
-        field.val(parseInt(field.val())+1);
-        updateTotals();
-      } else {
-        let params = {
-          'method': 'cardSelect',
-          'prodId': prodId
-        };
-        $.post("./buy_ajax.php", JSON.stringify(params), (response) => {
-          let data = JSON.parse(response);
-          if(data.errors){
-            console.info(data.errors);
-          } else {
-            $("#products tbody").append(`
-              <tr id='${data.card.prodId}' class=${data.card.foilStatus}>
-                <td class='qty'><input type='number' value='1' /></td>
-                <td class='image'><img src='../../images/${data.card.prodImage}' /></td>
-                <td class='name'>${data.card.prodName}</td>
-                <td class='price'>$${data.card.price}</td>
-                <td class='current-qty'>${data.card.currentQty}</td>
-              </tr>
-            `);
+    $("#set-select").change(() => {
+      let params = {
+        'method': 'setSelect',
+        'catId': $("#set-select").val()
+      };
+      $.post("./buy_ajax.php", JSON.stringify(params), (response) => {
+        let data = JSON.parse(response);
+        if(data.errors){
+          console.info(data.errors);
+        } else {
+          $("#card-select").html("<option value=''>Choose...</option>");
+          for(let i = 0, n = data.cards.length; i < n; i++){
+            $("#card-select").append(`<option value='${data.cards[i].prodId}'>${data.cards[i].prodName}</option>`);
           }
-        });
-        updateTotals();
-      }
-      $("#search-results").html(`
-        <div class='search-result'><p>No results</p></div>
-      `);
-      $("#search-results").hide();
-      $("#search-field").val('');
+        }
+      });
     });
   </script>
 </body>
