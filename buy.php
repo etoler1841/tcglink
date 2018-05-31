@@ -122,6 +122,7 @@
       overflow-y: auto;
       background-color: white;
       margin-top: 0;
+      position: absolute;
       display: none;
     }
 
@@ -136,7 +137,7 @@
       border-bottom: solid 1px #999;
     }
 
-    #search-results .search-result:hover {
+    #search-results .search-result.highlight {
       background-color: #eff;
     }
 
@@ -237,6 +238,33 @@
       updateTotals();
     }
 
+    function itemSearch(str){
+      let params = {
+        'method': 'search',
+        'str': str
+      };
+      $.post("./buy_ajax.php", JSON.stringify(params), (response) => {
+        let data = JSON.parse(response);
+        if(data.cards.length == 0){
+          $("#search-results").html(`
+            <div class='search-result'><p>No results</p></div>
+          `);
+          $("#search-results").hide();
+        } else {
+          $("#search-results").show();
+          $("#search-results").html('');
+          for(card of data.cards){
+            $("#search-results").append(`
+              <div class="search-result" id="res_${card.prodId}">
+                <img src="../../images/${card.image}" alt="" />
+                <span class="card-name">${card.prodName} [${card.setCode}]</span>
+              </div>
+            `);
+          }
+        }
+      });
+    }
+
     function updateTotals(){
       let total = singles = storeCredit = cash = 0;
       let addIns = $("#add-ins input");
@@ -313,6 +341,9 @@
     //listeners
     $(document).ready(() => {
       $("#search-field").focus();
+      $("#search-results").css("top", $("#search-field").position().top+$("#search-field").height);
+      $("#search-results").css("left", $("#search-field").position().left);
+      $("#search-results").css("width", $("#search-field").width);
     });
 
     $("#add-ins input").keyup((e) => {
@@ -329,7 +360,7 @@
       $(e.currentTarget).select();
     });
 
-    $("body").on("click", "#search-results .search-result", (e) => {
+    $("body").on("click", ".search-result", (e) => {
       let prod = e.currentTarget;
       let prodId = $(prod).attr("id").replace("res_", "");
       addItem(prodId);
@@ -337,7 +368,7 @@
       //   <div class='search-result'><p>No results</p></div>
       // `);
       $("#search-results").hide();
-      $("#search-field").val('');
+      // $("#search-field").val('');
     });
 
     $("#card-add").click(() => {
@@ -363,33 +394,80 @@
     });
 
     $("#search-field").keyup((e) => {
-      let str = $("#search-field").val();
-      if(str.length >= 3){
-        let params = {
-          'method': 'search',
-          'str': str
-        };
-        $.post("./buy_ajax.php", JSON.stringify(params), (response) => {
-          let data = JSON.parse(response);
-          if(data.cards.length == 0){
-            $("#search-results").html(`
-              <div class='search-result'><p>No results</p></div>
-            `);
-            $("#search-results").hide();
+      let box = $("#search-results");
+      let items = $(box).children(".search-result");
+      switch(e.which){
+        case 40:
+          if($(box).css("display") == 'none'){
+            $(box).show();
+            $(".highlight").removeClass("highlight");
+            $(items[0]).addClass("highlight");
+            $(box).scrollTop(0);
           } else {
-            $("#search-results").show();
-            $("#search-results").html('');
-            for(card of data.cards){
-              $("#search-results").append(`
-                <div class="search-result" id="res_${card.prodId}">
-                  <img src="../../images/${card.image}" alt="" />
-                  <span class="card-name">${card.prodName} [${card.setCode}]</span>
-                </div>
-              `);
+            for(let i = 0, n = items.length; i < n; i++){
+              if($(items[i]).hasClass("highlight")){
+                let j = $(items[i]).index();
+                if(j+1 < items.length){
+                  $(items[j]).removeClass("highlight");
+                  $(items[j+1]).addClass("highlight");
+                  console.log($(".highlight").position().top);
+                  let height = $(items[1]).position().top-$(items[0]).position().top;
+                  if($(".highlight").position().top > ($(box).position().top+$(box).height()-height)){
+                    let top = ((j+1)*height);
+                    $(box).scrollTop(top+height-$(box).height());
+                  }
+                }
+                break;
+              }
+              if($(box).children(".highlight").length == 0){
+                $(items[0]).addClass("highlight");
+                $(box).scrollTop(0);
+              }
             }
           }
-        })
+          break;
+        case 38:
+          //up arrow
+          for(let i = 0, n = items.length; i < n; i++){
+            if($(items[i]).hasClass("highlight")){
+              let j = $(items[i]).index();
+              if(j != 0){
+                $(items[j]).removeClass("highlight");
+                $(items[j-1]).addClass("highlight");
+                console.log($(".highlight").position().top);
+                if($(".highlight").position().top < $(box).position().top){
+                  let height = $(items[1]).position().top-$(items[0]).position().top;
+                  let top = ((j-1)*height);
+                  $(box).scrollTop(top);
+                }
+              }
+              break;
+            }
+          }
+          break;
+      case 13:
+        //enter
+        if($(".highlight").length == 1){
+          let prodId = $(".highlight").attr("id").replace("res_", "");
+          addItem(prodId);
+          $("#search-results").hide();
+        }
+        break;
+      case 27:
+        //esc
+        $("#search-results").hide();
+        break;
+      default:
+        let str = $("#search-field").val();
+        if(str.length >= 3){
+          itemSearch(str);
+        }
       }
+    });
+
+    $("body").on("mouseover", ".search-result", (e) => {
+      $(".highlight").removeClass("highlight");
+      $(e.currentTarget).addClass("highlight");
     });
 
     $("#set-select").change(() => {
