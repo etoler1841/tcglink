@@ -264,7 +264,7 @@
           for(card of data.cards){
             $("#search-results").append(`
               <div class='search-result' id='res_${card.prodId}'>
-                <img src='../../images/${card.prodImg}' alt=' />
+                <img src='../../images/${card.prodImg}' onerror='this.style.display="none"' />
                 <span class='card-name'>${card.prodName} [${card.setCode}]</span>
               </div>
             `);
@@ -364,6 +364,10 @@
       updateTotals();
     });
 
+    $("body").click(() => {
+      $("#search-results").hide();
+    });
+
     $("body").on("click", "input", (e) => {
       $(e.currentTarget).select();
     });
@@ -378,7 +382,7 @@
     $("body").on("mouseover", ".search-result", (e) => {
       $(".highlight").removeClass("highlight");
       $(e.currentTarget).addClass("highlight");
-      $("#img-div").html("<img src='"+$(e.currentTarget).children("img").attr("src")+"' alt='' />");
+      $("#img-div").html("<img src='"+$(e.currentTarget).children("img").attr("src")+"' onerror='this.style.display=\"none\"' />");
     });
 
     $("#card-add").click(() => {
@@ -389,7 +393,7 @@
     $("#products").on("mouseover", ".image img", (e) => {
       let img = $(e.currentTarget).attr("src");
       $("#img-div").show();
-      $("#img-div").html("<img src='"+$(e.currentTarget).attr("src")+"' alt='' />");
+      $("#img-div").html("<img src='"+$(e.currentTarget).attr("src")+"' onerror='this.style.display=\"none\"' />");
     });
 
     $("#products").on("mouseout", ".image img", (e) => {
@@ -409,6 +413,7 @@
       let items = $(box).children(".search-result");
       switch(e.which){
         case 40:
+          //down arrow
           if($(box).css("display") == 'none'){
             $(box).show();
             $(".highlight").removeClass("highlight");
@@ -422,7 +427,7 @@
                   $(items[j]).removeClass("highlight");
                   $(items[j+1]).addClass("highlight");
                   let height = $(items[1]).position().top-$(items[0]).position().top;
-                  if($(".highlight").position().top > ($(box).position().top+$(box).height()-height)){
+                  if($(".highlight").position().top >= ($(box).height()-height)){
                     let top = ((j+1)*height);
                     $(box).scrollTop(top+height-$(box).height());
                   }
@@ -435,11 +440,7 @@
               }
             }
           }
-<<<<<<< HEAD
-          $("#img-div").html("<img src='"+$(".highlight").children("img").attr("src")+"' />").show();
-=======
-          $("#img-div").html("<img src='"+$(".highlight").children("img").attr("src")+"' alt='' />").show();
->>>>>>> buylist-search
+          $("#img-div").html("<img src='"+$(".highlight").children("img").attr("src")+"' onerror='this.style.display=\"none\"' />").show();
           break;
         case 38:
           //up arrow
@@ -450,7 +451,7 @@
                 $(items[j]).removeClass("highlight");
                 $(items[j-1]).addClass("highlight");
                 console.log($(".highlight").position().top);
-                if($(".highlight").position().top < $(box).position().top){
+                if($(".highlight").position().top < 0){
                   let height = $(items[1]).position().top-$(items[0]).position().top;
                   let top = ((j-1)*height);
                   $(box).scrollTop(top);
@@ -459,11 +460,7 @@
               break;
             }
           }
-<<<<<<< HEAD
-          $("#img-div").html("<img src='"+$(".highlight").children("img").attr("src")+"' />").show();
-=======
-          $("#img-div").html("<img src='"+$(".highlight").children("img").attr("src")+"' alt='' />").show();
->>>>>>> buylist-search
+          $("#img-div").html("<img src='"+$(".highlight").children("img").attr("src")+"' onerror='this.style.display=\"none\"' />").show();
           break;
       case 13:
         //enter
