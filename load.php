@@ -75,17 +75,8 @@
       $data['cards'][$i]['is_foil'] = $row['is_foil'];
       $data['cards'][$i]['products_name'] = $row['products_name'];
       $data['cards'][$i]['set_code'] = $row['pb_code'];
-      // if(strtotime($row['foil_last_update']) < strtotime("24 hours ago") && $row['products_quantity'] > 0){
-      //   curl_setopt($ch, CURLOPT_URL, "http://www.pricebustersgames.com/pbadmin/tcglink/update_item.php?prodId=".$row['products_id']);
-      //   curl_exec($ch);
-      //   $stmt2 = "SELECT products_price, foil_last_update FROM products WHERE products_id = ".$row['products_id'];
-      //   $newResult = $conn->query($stmt2)->fetch_array(MYSQLI_ASSOC);
-      //   $lastUpdate = $newResult['foil_last_update'];
-      //   $data['cards'][$i]['products_price'] = number_format($newResult['products_price'], 2);
-      // } else {
-        $data['cards'][$i]['products_price'] = number_format($row['products_price'], 2);
-        $lastUpdate = $row['foil_last_update'];
-      // }
+      $data['cards'][$i]['products_price'] = number_format($row['products_price'], 2);
+      $lastUpdate = $row['foil_last_update'];
       switch (true){
         case strtotime($lastUpdate) > strtotime("6 hours ago"):
           $data['cards'][$i]['update_status'] = 'new';
@@ -460,14 +451,50 @@
   $("body").on("click", ".click-edit", (e) => {
     let val = $(e.currentTarget).html();
     let cell = $(e.currentTarget).parent();
-    $(cell).html("<input type='text' class='click-edit-field' value='"+val+"' size='2'/>");
+    $(cell).html("<input type='text' class='click-edit-field val_"+val+"' value='"+val+"' size='2'/>");
     $(".click-edit-field").select();
   });
 
   $("body").on("blur", ".click-edit-field", (e) => {
     let val = $(e.currentTarget).val();
-    let prop = $(e.currentTarget).parent().attr("class");
     let id = $(e.currentTarget).parent().parent().attr("id");
+    //hidden function
+    if(val == 'foil'){
+      let params = {
+        'method': 'makeFoil',
+        'prodId': id
+      };
+      $.post("./load_ajax.php", JSON.stringify(params), (response) => {
+        let data = JSON.parse(response);
+        if(data.status == 'ok'){
+          let card = data.card;
+          $("#"+id).after(`
+            <tr id='${card.prodId}' class='${card.showcaseStatus} foil'>
+              <td><img src='${card.prodImg}' /></td>
+              <td class='tcgpId'><span class='click-edit'>${card.tcgpId}</span></td>
+              <td>
+                <select class='foil-status' tabindex='-1'>
+                  <option value='0'>Normal</option>
+                  <option value='1' selected>Foil</option>
+                </select>
+              </td>
+              <td class='card-name'>${card.prodName} [${card.setCode}]</td>
+              <td class='bayou-qty'>0</td>
+              <td class='nine-mile-qty'>0</td>
+              <td class='qty'><input type='number' /></td>
+              <td><button class='label-print' tabindex='-1'>Print</button></td>
+              <td class='price new'>$${card.price}</td>
+            </tr>
+          `);
+        } else {
+          console.info(data.errors);
+        }
+      });
+      let old = $(".click-edit-field").attr("class").replace("click-edit-field val_", "");
+      $(".click-edit-field").parent().html("<span class='click-edit'>"+old+"</span>");
+      return;
+    }
+    let prop = $(e.currentTarget).parent().attr("class");
     let params = {
       'method': 'update',
       'prop': prop,
@@ -475,13 +502,14 @@
       'val': val
     };
     $.post("./load_ajax.php", JSON.stringify(params), (response) => {
-      console.log(response);
       let data = JSON.parse(response);
       if(!data.errors){
         $(e.currentTarget).parent().siblings(".price").html("$"+data.new_price).removeClass("new old ancient").addClass("new");
         $(e.currentTarget).parent().html("<span class='click-edit'>"+val+"</span>");
       } else {
         console.info(data.errors);
+        let old = $(".click-edit-field").attr("class").replace("click-edit-field val_", "");
+        $(".click-edit-field").parent().html("<span class='click-edit'>"+old+"</span>");
       }
     });
   });
@@ -521,6 +549,33 @@
     if(e.which == 13){
       $("#save").click();
     }
+  });
+
+  $(".foil-status").change((e) => {
+    let val = $(e.currentTarget).val();
+    let id = $(e.currentTarget).parent().parent().attr("id");
+    let params = {
+      'method': 'foil',
+      'prodId': id,
+      'val': val
+    };
+    $.post("./load_ajax.php", JSON.stringify(params), (response) => {
+      console.log(response);
+      let data = JSON.parse(response);
+      console.info(data.result);
+      if(!data.errors){
+        $(e.currentTarget).parent().siblings(".price").html("$"+data.new_price).removeClass("new old ancient").addClass("new");
+      } else {
+        console.info(data.errors);
+      }
+    });
+  });
+
+  $(".label-print").click((e) => {
+    let text = $(e.currentTarget).parent().siblings(".card-name").html();
+    let id = $(e.currentTarget).parent().parent().attr("id");
+    let qty = $(e.currentTarget).parent().siblings(".qty").children("input").val();
+    printMTGLabel(text, id, qty);
   });
 
   $("#save").click(() => {
@@ -575,32 +630,5 @@
   $("#setSubmit").click(() => {
     let val = $("#setSelect").val();
     window.location.href = "?set="+val;
-  });
-
-  $(".foil-status").change((e) => {
-    let val = $(e.currentTarget).val();
-    let id = $(e.currentTarget).parent().parent().attr("id");
-    let params = {
-      'method': 'foil',
-      'prodId': id,
-      'val': val
-    };
-    $.post("./load_ajax.php", JSON.stringify(params), (response) => {
-      console.log(response);
-      let data = JSON.parse(response);
-      console.info(data.result);
-      if(!data.errors){
-        $(e.currentTarget).parent().siblings(".price").html("$"+data.new_price).removeClass("new old ancient").addClass("new");
-      } else {
-        console.info(data.errors);
-      }
-    });
-  });
-
-  $(".label-print").click((e) => {
-    let text = $(e.currentTarget).parent().siblings(".card-name").html();
-    let id = $(e.currentTarget).parent().parent().attr("id");
-    let qty = $(e.currentTarget).parent().siblings(".qty").children("input").val();
-    printMTGLabel(text, id, qty);
   });
 </script>
