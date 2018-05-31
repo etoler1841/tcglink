@@ -256,7 +256,7 @@
           for(card of data.cards){
             $("#search-results").append(`
               <div class="search-result" id="res_${card.prodId}">
-                <img src="../../images/${card.image}" alt="" />
+                <img src="../../images/${card.prodImg}" alt="" />
                 <span class="card-name">${card.prodName} [${card.setCode}]</span>
               </div>
             `);
