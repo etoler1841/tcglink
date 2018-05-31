@@ -377,6 +377,7 @@
       let prodId = $(prod).attr("id").replace("res_", "");
       addItem(prodId);
       $("#search-results").hide();
+      $("#img-div").hide();
     });
 
     $("body").on("mouseover", ".search-result", (e) => {
