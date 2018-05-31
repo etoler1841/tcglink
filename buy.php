@@ -142,6 +142,7 @@
       height: 100%;
       width: auto;
       float: left;
+      margin-right: 5px;
     }
 
     #search-results .search-result.highlight {
@@ -420,7 +421,6 @@
                 if(j+1 < items.length){
                   $(items[j]).removeClass("highlight");
                   $(items[j+1]).addClass("highlight");
-                  console.log($(".highlight").position().top);
                   let height = $(items[1]).position().top-$(items[0]).position().top;
                   if($(".highlight").position().top > ($(box).position().top+$(box).height()-height)){
                     let top = ((j+1)*height);
@@ -435,7 +435,7 @@
               }
             }
           }
-          $("#img-div").attr("src", $(".highlight").children("img").attr("src")).show();
+          $("#img-div").html("<img src='"+$(".highlight").children("img").attr("src")+"' />").show();
           break;
         case 38:
           //up arrow
@@ -455,7 +455,7 @@
               break;
             }
           }
-          $("#img-div").attr("src", $(".highlight").children("img").attr("src")).show();
+          $("#img-div").html("<img src='"+$(".highlight").children("img").attr("src")+"' />").show();
           break;
       case 13:
         //enter
