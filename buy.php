@@ -78,6 +78,7 @@
       z-index: 1;
       width: 216px;
       height: 300px;
+      display: none;
     }
 
     #img-div img {
@@ -117,7 +118,7 @@
       border: 1px solid #333;
       box-shadow: 2px 2px 10px #666;
       width: 380px;
-      max-height: 250px;
+      max-height: 350px;
       overflow-x: hidden;
       overflow-y: auto;
       background-color: white;
@@ -132,9 +133,15 @@
       align-items: center;
       align-content: stretch;
       padding: 10px;
-      height: 25px;
+      height: 50px;
       width: auto;
       border-bottom: solid 1px #999;
+    }
+
+    #search-results .search-result img {
+      height: 100%;
+      width: auto;
+      float: left;
     }
 
     #search-results .search-result.highlight {
@@ -364,11 +371,13 @@
       let prod = e.currentTarget;
       let prodId = $(prod).attr("id").replace("res_", "");
       addItem(prodId);
-      // $("#search-results").html(`
-      //   <div class='search-result'><p>No results</p></div>
-      // `);
       $("#search-results").hide();
-      // $("#search-field").val('');
+    });
+
+    $("body").on("mouseover", ".search-result", (e) => {
+      $(".highlight").removeClass("highlight");
+      $(e.currentTarget).addClass("highlight");
+      $("#img-div").html("<img src='"+$(e.currentTarget).children("img").attr("src")+"' />");
     });
 
     $("#card-add").click(() => {
@@ -378,11 +387,12 @@
 
     $("#products").on("mouseover", ".image img", (e) => {
       let img = $(e.currentTarget).attr("src");
-      $("#img-div").html("<img src='"+img+"' />");
+      $("#img-div").show();
+      $("#img-div").html("<img src='"+$(e.currentTarget).children("img").attr("src")+"' />");
     });
 
     $("#products").on("mouseout", ".image img", (e) => {
-      $("#img-div").html("");
+      $("#img-div").hide();
     });
 
     $("#products").on("change keyup click", ".qty input", (e) => {
@@ -425,6 +435,7 @@
               }
             }
           }
+          $("#img-div").attr("src", $(".highlight").children("img").attr("src")).show();
           break;
         case 38:
           //up arrow
@@ -444,6 +455,7 @@
               break;
             }
           }
+          $("#img-div").attr("src", $(".highlight").children("img").attr("src")).show();
           break;
       case 13:
         //enter
@@ -452,9 +464,11 @@
           addItem(prodId);
           $("#search-results").hide();
         }
+        $("#img-div").hide();
         break;
       case 27:
         //esc
+        $("#img-div").hide();
         $("#search-results").hide();
         break;
       default:
@@ -463,11 +477,6 @@
           itemSearch(str);
         }
       }
-    });
-
-    $("body").on("mouseover", ".search-result", (e) => {
-      $(".highlight").removeClass("highlight");
-      $(e.currentTarget).addClass("highlight");
     });
 
     $("#set-select").change(() => {
