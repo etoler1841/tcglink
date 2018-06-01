@@ -221,6 +221,7 @@
       if($("#"+prodId).length > 0){
         let field = $("#"+prodId+" .qty input");
         field.val(parseInt(field.val())+1);
+        updateTotals();
       } else {
         let params = {
           'method': 'cardSelect',
@@ -240,10 +241,10 @@
                 <td class='current-qty'>${data.card.currentQty}</td>
               </tr>
             `);
+            updateTotals();
           }
         });
       }
-      updateTotals();
     }
 
     function itemSearch(str){
@@ -264,7 +265,7 @@
           for(card of data.cards){
             $("#search-results").append(`
               <div class='search-result' id='res_${card.prodId}'>
-                <img src='../../images/${card.prodImg}' alt=' />
+                <img src='../../images/${card.prodImg}' onerror='this.style.display=\"none\"' />
                 <span class='card-name'>${card.prodName} [${card.setCode}]</span>
               </div>
             `);
@@ -368,18 +369,10 @@
       $(e.currentTarget).select();
     });
 
-    $("body").on("click", ".search-result", (e) => {
-      let prod = e.currentTarget;
-      let prodId = $(prod).attr("id").replace("res_", "");
-      addItem(prodId);
-      $("#search-results").hide();
-      $("#img-div").hide();
-    });
-
     $("body").on("mouseover", ".search-result", (e) => {
       $(".highlight").removeClass("highlight");
       $(e.currentTarget).addClass("highlight");
-      $("#img-div").html("<img src='"+$(e.currentTarget).children("img").attr("src")+"' alt='' />");
+      $("#img-div").html("<img src='"+$(e.currentTarget).children("img").attr("src")+"' onerror='this.style.display=\"none\"' />");
     });
 
     $("#card-add").click(() => {
@@ -390,7 +383,7 @@
     $("#products").on("mouseover", ".image img", (e) => {
       let img = $(e.currentTarget).attr("src");
       $("#img-div").show();
-      $("#img-div").html("<img src='"+$(e.currentTarget).attr("src")+"' alt='' />");
+      $("#img-div").html("<img src='"+$(e.currentTarget).attr("src")+"' onerror='this.style.display=\"none\"' />");
     });
 
     $("#products").on("mouseout", ".image img", (e) => {
@@ -436,7 +429,7 @@
               }
             }
           }
-          $("#img-div").html("<img src='"+$(".highlight").children("img").attr("src")+"' alt='' />").show();
+          $("#img-div").html("<img src='"+$(".highlight").children("img").attr("src")+"' onerror='this.style.display=\"none\"' />").show();
           break;
         case 38:
           //up arrow
@@ -456,7 +449,7 @@
               break;
             }
           }
-          $("#img-div").html("<img src='"+$(".highlight").children("img").attr("src")+"' alt='' />").show();
+          $("#img-div").html("<img src='"+$(".highlight").children("img").attr("src")+"'' onerror='this.style.display=\"none\"' />").show();
           break;
       case 13:
         //enter
@@ -478,6 +471,15 @@
           itemSearch(str);
         }
       }
+    });
+
+    $("#search-results").on("click", ".search-result", (e) => {
+      let prod = e.currentTarget;
+      let prodId = $(prod).attr("id").replace("res_", "");
+      addItem(prodId);
+      updateTotals();
+      $("#search-results").hide();
+      $("#img-div").hide();
     });
 
     $("#set-select").change(() => {
