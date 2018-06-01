@@ -48,6 +48,7 @@
           curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
           $curlRes = json_decode(curl_exec($ch));
           $return['card']['price'] = number_format($curlRes->new_price, 2);
+          $return['url'] = "$path/update_item.php?prodId=".$data['prodId'];
         } else {
           $return['card']['price'] = number_format($row['products_price'], 2);
         }

@@ -221,6 +221,7 @@
       if($("#"+prodId).length > 0){
         let field = $("#"+prodId+" .qty input");
         field.val(parseInt(field.val())+1);
+        updateTotals();
       } else {
         let params = {
           'method': 'cardSelect',
@@ -240,10 +241,10 @@
                 <td class='current-qty'>${data.card.currentQty}</td>
               </tr>
             `);
+            updateTotals();
           }
         });
       }
-      updateTotals();
     }
 
     function itemSearch(str){
@@ -372,14 +373,6 @@
       $(e.currentTarget).select();
     });
 
-    $("body").on("click", ".search-result", (e) => {
-      let prod = e.currentTarget;
-      let prodId = $(prod).attr("id").replace("res_", "");
-      addItem(prodId);
-      $("#search-results").hide();
-      $("#img-div").hide();
-    });
-
     $("body").on("mouseover", ".search-result", (e) => {
       $(".highlight").removeClass("highlight");
       $(e.currentTarget).addClass("highlight");
@@ -483,6 +476,15 @@
           itemSearch(str);
         }
       }
+    });
+
+    $("#search-results").on("click", ".search-result", (e) => {
+      let prod = e.currentTarget;
+      let prodId = $(prod).attr("id").replace("res_", "");
+      addItem(prodId);
+      updateTotals();
+      $("#search-results").hide();
+      $("#img-div").hide();
     });
 
     $("#set-select").change(() => {
