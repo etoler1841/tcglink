@@ -229,9 +229,7 @@
         };
         $.post("./buy_ajax.php", JSON.stringify(params), (response) => {
           let data = JSON.parse(response);
-          if(data.errors){
-            console.info(data.errors);
-          } else {
+          if(!data.errors){
             $("#products tbody").append(`
               <tr id='${data.card.prodId}' class=${data.card.foilStatus}>
                 <td class='qty'><input type='number' value='1' /></td>
@@ -444,7 +442,6 @@
               if(j != 0){
                 $(items[j]).removeClass("highlight");
                 $(items[j-1]).addClass("highlight");
-                console.log($(".highlight").position().top);
                 if($(".highlight").position().top < 0){
                   let height = $(items[1]).position().top-$(items[0]).position().top;
                   let top = ((j-1)*height);
@@ -494,9 +491,7 @@
       };
       $.post("./buy_ajax.php", JSON.stringify(params), (response) => {
         let data = JSON.parse(response);
-        if(data.errors){
-          console.info(data.errors);
-        } else {
+        if(!data.errors){
           $("#card-select").html("<option value=''>Choose...</option>");
           for(let i = 0, n = data.cards.length; i < n; i++){
             $("#card-select").append(`<option value='${data.cards[i].prodId}'>${data.cards[i].prodName}</option>`);

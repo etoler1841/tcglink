@@ -79,7 +79,7 @@
       $return['errors'][] = $err;
     }
   }
-  if($data->results){
+  if(isset($data->results)){
     $error = 1;
     foreach($data->results as $price){
       if($price->subTypeName == $cond){

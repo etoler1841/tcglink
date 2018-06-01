@@ -51,7 +51,7 @@
     $data['sets'][$row[0]] = $row[1].' ['.$row[2].']';
   }
 
-  if(isset($_GET['search']) || isset($_GET['set'])){
+  if((isset($_GET['search']) && $_GET['search'] != '') || (isset($_GET['set']) && $_GET['set'] != '')){
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     $stmt = "SELECT cl.products_id, p.products_image, cl.tcgp_id, cl.is_foil, pd.products_name, s.pb_code, p.products_quantity, i.product_stock, p.products_price, p.foil_last_update, s.is_standard
@@ -482,8 +482,6 @@
               <td class='price new'>$${card.price}</td>
             </tr>
           `);
-        } else {
-          console.info(data.errors);
         }
       });
       let old = $(".click-edit-field").attr("class").replace("click-edit-field val_", "");
@@ -503,14 +501,13 @@
         $(e.currentTarget).parent().siblings(".price").html("$"+data.new_price).removeClass("new old ancient").addClass("new");
         $(e.currentTarget).parent().html("<span class='click-edit'>"+val+"</span>");
       } else {
-        console.info(data.errors);
         let old = $(".click-edit-field").attr("class").replace("click-edit-field val_", "");
         $(".click-edit-field").parent().html("<span class='click-edit'>"+old+"</span>");
       }
     });
   });
 
-  $("body").on("blur", ".qty input", (e) => {
+  $("#cardData").on("blur", ".qty input", (e) => {
     if($(e.currentTarget).val() <= 0 || $(e.currentTarget).val() == ''){
       return;
     }
@@ -522,18 +519,14 @@
     };
     $.post("./load_ajax.php", JSON.stringify(params), (response) => {
       let data = JSON.parse(response);
-      console.info(data);
       if(!data.errors){
         $(e.currentTarget).parent().siblings(".price").html("$"+data.new_price).removeClass("new old ancient").addClass("new");
-      } else {
-        console.info(data.errors);
       }
     });
   });
 
   $("#cardData").on("mouseover", "img", (e) => {
     let img = $(e.currentTarget).attr("src");
-    console.log(img);
     $("#img-div").html("<img src='"+img+"' />")
   });
 
@@ -541,13 +534,13 @@
     $("#img-div").html("");
   });
 
-  $("#cardData tbody input").keyup((e) => {
+  $("#cardData").on("keyup", ".qty input", (e) => {
     if(e.which == 13){
       $("#save").click();
     }
   });
 
-  $(".foil-status").change((e) => {
+  $("#cardData").on("change", ".foil-status", (e) => {
     let val = $(e.currentTarget).val();
     let id = $(e.currentTarget).parent().parent().attr("id");
     let params = {
@@ -556,18 +549,14 @@
       'val': val
     };
     $.post("./load_ajax.php", JSON.stringify(params), (response) => {
-      console.log(response);
       let data = JSON.parse(response);
-      console.info(data.result);
       if(!data.errors){
         $(e.currentTarget).parent().siblings(".price").html("$"+data.new_price).removeClass("new old ancient").addClass("new");
-      } else {
-        console.info(data.errors);
       }
     });
   });
 
-  $(".label-print").click((e) => {
+  $("#cardData").on("click", ".label-print", (e) => {
     let text = $(e.currentTarget).parent().siblings(".card-name").html();
     let id = $(e.currentTarget).parent().parent().attr("id");
     let qty = $(e.currentTarget).parent().siblings(".qty").children("input").val();
