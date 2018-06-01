@@ -2,3 +2,4 @@ includes/db.php
 includes/includes.php
 pbgames
 error_log
+config
