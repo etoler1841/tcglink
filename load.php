@@ -426,13 +426,9 @@
                 </tr>";
               } ?>
             </tbody>
-            <tfoot>
-              <tr>
-                <td colspan='<?=7+sizeof($data['cards'][0]['qty'])?>'><button id='save' class='save-btn'>Save changes</button></td>
-              </tr>
-            </tfoot>
           </table>
-        </div> <?php
+        </div>
+        <button id='save' class='save-btn'>Save changes</button> <?php
       }
     ?>
   </div>
@@ -535,13 +531,13 @@
     });
   });
 
-  $("#cardData img").mouseover((e) => {
+  $("#cardData").on("mouseover", "img", (e) => {
     let img = $(e.currentTarget).attr("src");
     console.log(img);
     $("#img-div").html("<img src='"+img+"' />")
   });
 
-  $("#cardData img").mouseout((e) => {
+  $("#cardData").on("mouseout", "img", (e) => {
     $("#img-div").html("");
   });
 
