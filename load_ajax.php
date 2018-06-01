@@ -70,7 +70,7 @@
           curl_setopt($ch, CURLOPT_URL, "$path/update_item.php?prodId=".$data['prodId']);
           curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
           $curlRes = json_decode(curl_exec($ch));
-          if($curlRes->errors){
+          if(isset($curlRes->errors)){
             $return['status'] = 'err';
             $return['errors']['curl'] = $curlRes->errors;
           } else {
@@ -93,7 +93,7 @@
         curl_setopt($ch, CURLOPT_URL, "$path/update_item.php?prodId=".$data['prodId']);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         $curlRes = json_decode(curl_exec($ch));
-        if($curlRes->errors){
+        if(isset($curlRes->errors)){
           $return['status'] = 'err';
           $return['errors']['curl'] = $curlRes->errors;
         } else {
