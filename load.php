@@ -51,7 +51,7 @@
     $data['sets'][$row[0]] = $row[1].' ['.$row[2].']';
   }
 
-  if((isset($_GET['search']) && $_GET['search'] != '') || (isset($_GET['set'] && $_GET['set'] != ''))){
+  if((isset($_GET['search']) && $_GET['search'] != '') || (isset($_GET['set']) && $_GET['set'] != '')){
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     $stmt = "SELECT cl.products_id, p.products_image, cl.tcgp_id, cl.is_foil, pd.products_name, s.pb_code, p.products_quantity, i.product_stock, p.products_price, p.foil_last_update, s.is_standard
