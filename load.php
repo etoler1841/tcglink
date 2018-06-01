@@ -537,7 +537,7 @@
     $("#img-div").html("<img src='"+img+"' />")
   });
 
-  $("#cardData").on("mouseout", "img", (e)(e) => {
+  $("#cardData").on("mouseout", "img", (e) => {
     $("#img-div").html("");
   });
 
