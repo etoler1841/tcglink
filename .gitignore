@@ -3,3 +3,4 @@ includes/includes.php
 pbgames
 error_log
 config
+img/*
