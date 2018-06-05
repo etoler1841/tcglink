@@ -12,7 +12,8 @@
         break;
       }
       $stmt = "UPDATE products
-               SET products_quantity = products_quantity + ".$data['qty']."
+               SET products_quantity = products_quantity + ".$data['qty'].",
+                   arrival_time = '".date("Y-m-d H:i:s")."'
                WHERE products_id = ".$data['prodId'];
       $conn->query($stmt);
       if($conn->error){
