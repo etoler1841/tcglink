@@ -167,7 +167,7 @@
         <?php
         foreach($cards as $card){
           echo "<tr class='".$card['foilStatus']."'>
-            <td><img src='../../".$card['img']."' onerror='this.style.display=\"none\"' /></td>
+            <td><img src='../../images/".$card['img']."' onerror='this.style.display=\"none\"' /></td>
             <td class='prodId'>".$card['prodId']."</td>
             <td class='tcgpId'><span class='click-edit'>".$card['tcgpId']."</span></td>
             <td class='prodName'>".$card['prodName']." [".$card['setCode']."]</td>
