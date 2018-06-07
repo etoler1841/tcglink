@@ -231,13 +231,13 @@
       });
     });
 
-    $("#cardData").on("mouseover", "img", (e) => {
+    $("table").on("mouseover", "img", (e) => {
       let img = $(e.currentTarget).attr("src");
       $("#img-div").html("<img src='"+img+"' />");
       $("#img-div").show();
     });
 
-    $("#cardData").on("mouseout", "img", (e) => {
+    $("table").on("mouseout", "img", (e) => {
       $("#img-div").html("");
       $("#img-div").hide();
     });
