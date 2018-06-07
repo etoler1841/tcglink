@@ -1,7 +1,7 @@
 <?php
   define("SITE_ROOT", '.');
   include(SITE_ROOT.'/includes/includes.php');
-  $fileRoot = '.'; // '../..' for live server
+  $fileRoot = '../..';
 
   if(isset($_POST['upload'])){
     foreach($_FILES as $prodId => $file){
