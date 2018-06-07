@@ -434,12 +434,7 @@
   </div>
 </body>
 <script>
-  $(window).load(() => {
-    $("#note").css("left", ($("#search").position().left-250)+"px");
-    $("#note").css("top", ($("#search").position().top-5)+"px");
-  });
-
-  $(window).resize(() => {
+  $(window).on("load resize", () => {
     $("#note").css("left", ($("#search").position().left-250)+"px");
     $("#note").css("top", ($("#search").position().top-5)+"px");
   });
