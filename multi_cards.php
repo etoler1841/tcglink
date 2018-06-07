@@ -1,6 +1,21 @@
 <?php
   define("SITE_ROOT", '.');
   include(SITE_ROOT.'/includes/includes.php');
+  $fileRoot = '.'; // '../..' for live server
+
+  if(isset($_POST['upload'])){
+    foreach($_FILES as $prodId => $file){
+      $stmt = "SELECT products_image
+               FROM products
+               WHERE products_id = $prodId";
+      $row = $conn->query($stmt)->fetch_array(MYSQLI_NUM);
+      $file = $file['tmp_name'];
+      $target = $fileRoot.'/images/'.$row[0];
+      if(move_uploaded_file($file, $target)){
+        $results[] = '<p>'.$prodId.': image was successfully uploaded</p>';
+      }
+    }
+  }
 
   $sql = "SELECT p.products_id, p.products_image, pd.products_name, cl.tcgp_id, s.pb_code
           FROM mtg_card_link cl
@@ -28,7 +43,7 @@
   }
 ?>
 <head>
-  <title>PBAdmin - Load MTG Singles</title>
+  <title>PBAdmin - Alter Multi-art Cards</title>
   <style>
     body {
       font-family: Tahoma, sans-serif;
@@ -126,7 +141,7 @@
 </head>
 <body>
   <div id='img-div'></div>
-  <form action=''>
+  <form action='' method='post' enctype='multipart/form-data'>
     <table>
       <thead>
         <th>Image</th>
@@ -151,13 +166,20 @@
         ?>
       </tbody>
     </table>
-    <input type='submit' value='Upload image(s)' class='save-btn' />
+    <input type='submit' name='upload' value='Upload image(s)' class='save-btn' />
   </form>
+  <?php
+    if(isset($results)){
+      foreach($results as $result){
+        echo $result;
+      }
+    }
+  ?>
   <script>
     $("body").on("click", ".click-edit", (e) => {
       let val = $(e.currentTarget).html();
       let cell = $(e.currentTarget).parent();
-      $(cell).html("<input type='text' class='click-edit-field val_"+val+"' value='"+val+"' size='2'/>");
+      $(cell).html("<input type='text' class='click-edit-field val_"+val+"' value='"+val+"' size='6'/>");
       $(".click-edit-field").select();
     });
 
@@ -166,7 +188,11 @@
       let val = $(e.currentTarget).val();
       let prodId = $(e.currentTarget).parent().siblings(".prodId").html();
       let prodName = $(e.currentTarget).parent().siblings(".prodName").html();
-      if(!val) return;
+      if(!val || val === '-'){
+        let old = $(".click-edit-field").attr("class").replace("click-edit-field val_", "");
+        $(".click-edit-field").parent().html("<span class='click-edit'>"+old+"</span>");
+        return;
+      }
       let params = {
         action: 'update',
         prop: prop,
@@ -179,6 +205,7 @@
         if(!data.errors){
           $(e.currentTarget).parent().html("<span class='click-edit'>"+val+"</span>");
         } else {
+          console.info(data);
           let old = $(".click-edit-field").attr("class").replace("click-edit-field val_", "");
           $(".click-edit-field").parent().html("<span class='click-edit'>"+old+"</span>");
         }
