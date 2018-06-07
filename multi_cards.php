@@ -17,11 +17,12 @@
     }
   }
 
-  $sql = "SELECT p.products_id, p.products_image, pd.products_name, cl.tcgp_id, s.pb_code
+  $sql = "SELECT p.products_id, p.products_image, pd.products_name, cl.tcgp_id, s.pb_code, p.products_quantity, i.product_stock
           FROM mtg_card_link cl
           LEFT JOIN products p ON cl.products_id = p.products_id
           LEFT JOIN products_description pd ON p.products_id = pd.products_id
           LEFT JOIN mtg_sets s ON p.master_categories_id = s.categories_id
+          LEFT JOIN pos_inventory_2 i ON p.products_id = i.product_id
           WHERE cl.products_id = ?";
   $stmt = $conn->prepare($sql);
   $stmt2 = "SELECT products_id FROM mtg_update";
@@ -29,16 +30,19 @@
   while($row = $result->fetch_array(MYSQLI_NUM)){
     $stmt->bind_param("i", $row[0]);
     $stmt->execute();
-    $stmt->bind_result($prodId, $img, $prodName, $tcgpId, $setCode);
+    $stmt->bind_result($prodId, $img, $prodName, $tcgpId, $setCode, $qty, $nineQty);
     $stmt->store_result();
     $stmt->fetch();
     $cards[] = array(
       'prodId' => $prodId,
       'img' => $img,
-      'prodName' => (strpos($prodName, '(') ? substr($prodName, 0, strpos($prodName, ' (')) : (strpos($prodName, '[') ? substr($prodName, 0, strpos($prodName, ' [')) : $prodName)),
+      'prodName' => (strpos($prodName, '(') ? substr($prodName, 0, strpos($prodName, ' (')) : (strpos($prodName, '[') ? substr($prodName, 0, strpos($prodName, ' [')) : $prodName)).(strpos($prodName, ' - Foil') ? ' - Foil' : ''),
       'desc' => (strpos($prodName, '(') ? substr($prodName, strpos($prodName, '(')+1, strpos($prodName, ')')-strpos($prodName, '(')-1) : (strpos($prodName, '[') ? substr($prodName, strpos($prodName, '[')+1, strpos($prodName, ']')-strpos($prodName, '[')-1) : '-')),
       'tcgpId' => $tcgpId,
-      'setCode' => $setCode
+      'setCode' => $setCode,
+      'foilStatus' => strpos($prodName, ' - Foil') ? 'foil' : 'normal',
+      'qty' => $qty,
+      'nineQty' => ($nineQty ? $nineQty : 0)
     );
   }
 ?>
@@ -63,6 +67,10 @@
 
     tr, td, th {
       border: 0;
+    }
+
+    tr {
+      border-bottom: #666 solid 1px;
     }
 
     td, th {
@@ -97,6 +105,7 @@
       z-index: 1;
       width: 216px;
       height: 300px;
+      display: none;
     }
 
     #img-div img {
@@ -149,18 +158,24 @@
         <th>TCG ID</th>
         <th>Name</th>
         <th>Desc.</th>
+        <th>Qty.</th>
+        <th>Nine Mile</th>
         <th>Upload</th>
+        <th>Delete</th>
       </thead>
       <tbody>
         <?php
         foreach($cards as $card){
-          echo "<tr>
-            <td><img src='../../".$card['img']."' onerror='this.style.display=\"none\"' /></td>
+          echo "<tr class='".$card['foilStatus']."'>
+            <td><img src='../../images/".$card['img']."' onerror='this.style.display=\"none\"' /></td>
             <td class='prodId'>".$card['prodId']."</td>
             <td class='tcgpId'><span class='click-edit'>".$card['tcgpId']."</span></td>
             <td class='prodName'>".$card['prodName']." [".$card['setCode']."]</td>
             <td class='desc'><span class='click-edit'>".$card['desc']."</span></td>
-            <td><input type='file' name='".$card['prodId']."' accept='.jpg' /></td>
+            <td class='qty'><span class='click-edit'>".$card['qty']."</span></td>
+            <td class='nine-qty'>".$card['nineQty']."</td>
+            <td class='upload'><input type='file' name='".$card['prodId']."' accept='.jpg' /></td>
+            <td class='del'><button class='del-btn'>Delete</button></td>
           </tr>";
         }
         ?>
@@ -210,6 +225,39 @@
           $(".click-edit-field").parent().html("<span class='click-edit'>"+old+"</span>");
         }
       });
+    });
+
+    $("#cardData").on("mouseover", "img", (e) => {
+      let img = $(e.currentTarget).attr("src");
+      $("#img-div").html("<img src='"+img+"' />");
+      $("#img-div").show();
+    });
+
+    $("#cardData").on("mouseout", "img", (e) => {
+      $("#img-div").html("");
+      $("#img-div").hide();
+    });
+
+    $(".del-btn").click((e) => {
+      let prodId = $(e.currentTarget).parent().siblings(".prodId").html();
+      if(confirm("Are you sure you want to permanently delete product #"+prodId+"?")){
+        let params = {
+          action: 'delete',
+          prodId: prodId
+        };
+        $.post("./multi_ajax.php", JSON.stringify(params), (response) => {
+          let data = JSON.parse(response);
+          if(!data.errors){
+            $(e.currentTarget).parent().parent().remove();
+          } else {
+            console.info(data.errors);
+            window.alert("There was an error processing your request. Check the console for more details.");
+          }
+        });
+        return false;
+      } else {
+        return false;
+      }
     });
   </script>
 </body>
