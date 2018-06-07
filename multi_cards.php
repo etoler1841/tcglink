@@ -78,6 +78,10 @@
       padding: 5px;
     }
 
+    table img {
+      height: 35px;
+    }
+
     #cardData img {
       height: 35px;
     }
