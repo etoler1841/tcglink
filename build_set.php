@@ -3,6 +3,8 @@
   require(SITE_ROOT.'/includes/includes.php');
 
   $tcgpId = $_GET['tcgpId'];
+
+  //Build the set into the database here!
 ?>
 <head>
 
@@ -14,6 +16,7 @@
       <th>Name</th>
       <th>TCGP ID</th>
       <th>Product ID</th>
+      <th>Product ID (Foil)</th>
       <th>Multiverse ID</th>
     </thead>
     <tbody>
@@ -34,6 +37,7 @@
               <td class='name'>".$card->productName."</td>
               <td class='tcgp-id'>".$card->productId."</td>
               <td class='product-id'></td>
+              <td class='product-id-foil'></td>
               <td class='multiverse-id'></td>
             </tr>";
           }
@@ -54,7 +58,8 @@
           console.info(data.errors);
         } else {
           $(rows[i]).children(".product-id").html(data.result.prodId);
-          $.get("./gatherer_scrape.php?prodId="+data.prodId, (response) => {
+          $(rows[i]).childreN(".product_id-foil").html(data.result.prodId_foil);
+          $.get("./gatherer_scrape.php?prodId="+data.result.prodId, (response) => {
             let data = JSON.parse(response);
             if($data.status == 'err'){
               console.info(data.errors);
