@@ -22,7 +22,7 @@
       if($stmt->num_rows){
         //echo "<p>".$set->name." [".$set->abbreviation."] found</p>";
       } else {
-        echo "<p>".$set->name." [".$set->abbreviation."] not found. <button id='".$set->groupId."' class='build'>Build</button></p>";
+        echo "<p>".$set->name." [".$set->abbreviation."] not found. <button id='".$set->groupId."' class='build'>Build</button> (<input type='checkbox' name='".$set->groupId."_check' /><label for='".$set->groupId."_check'>Standard?</label>)</p>";
       }
     }
     $i++;
@@ -31,6 +31,7 @@
 <script>
   $(".build").click((e) => {
     let tcgpId = $(e.currentTarget).attr("id");
-    window.location.href = "./build_set.php?tcgpId="+tcgpId;
+    let isStandard = ($(e.currentTarget).siblings("input[type=checkbox]").prop("checked") ? 1 : 0);
+    window.location.href = "./build_set.php?tcgpId="+tcgpId+"&isStandard="+isStandard;
   });
 </script>
