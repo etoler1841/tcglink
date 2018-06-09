@@ -39,7 +39,7 @@
       preg_match("/<div[a-z,A-Z,0-9,\",_,=,\s]*?class=\"row manaRow\">.*?<div class=\"value\">(.*?)<\/div>/si", $data, $manaCost);
       preg_match("/<div class=\"label\">\s*Color Indicator:.*?<\/div>.*?<div class=\"value\">(.*?)<\/div>/si", $data, $colorIndicator);
       preg_match("/<div class=\"label\">\s*Types:.*?<\/div>.*?<div class=\"value\">(.*?)<\/div>/si", $data, $type);
-      if(strpos(trim($type[1]), '  ')) $type[1] = substr(trim($type[1]), 0, strpost(trim($type[1]), '  '));
+      if(strpos(trim($type[1]), '  ')) $type[1] = substr(trim($type[1]), 0, strpos(trim($type[1]), '  '));
       if(strpos($type[1], 'Basic Land')) $type[1] = 'Basic Land';
       if(!isset($manaCost[1])){
         $manaCost = array();
