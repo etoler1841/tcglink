@@ -109,7 +109,7 @@
         } else {
           $(rows[i]).children(".product-id").html(data.result.prodId);
           $(rows[i]).childreN(".product_id-foil").html(data.result.prodId_foil);
-          $.get("./gatherer_scrape.php?prodId="+data.result.prodId, (response) => {
+          $.get("./gatherer_scrape.php?prodId="+data.result.prodId+"&tcpgId="+tcgpId, (response) => {
             let data = JSON.parse(response);
             if($data.status == 'err'){
               console.info(data.errors);

@@ -143,9 +143,10 @@
               curl_setopt($ch2, CURLOPT_URL, "$path/update_item.php?prodId=".$prodId);
               curl_exec($ch2);
             }
+            $return['status'] = 'ok';
           } else {
             $return['status'] = 'err';
-            $return['errors'][] = 'Duplicate product detected';
+            $return['errors'][] = 'Duplicate product detected.';
           }
         } else {
           $return['status'] = 'err';
