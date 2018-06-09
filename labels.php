@@ -10,7 +10,7 @@
     $sets[] = array(
       'name' => $row['set_name'],
       'code' => $row['pb_code'],
-      'img' => $_SERVER['DOCUMENT_ROOT'].'/pbadmin/tcglink/img/'.$row['pb_code'].'.jpg'
+      'img' => 'http://www.pricebustersgames.com/pbadmin/tcglink/img/'.$row['pb_code'].'.jpg'
     );
   }
 ?>
