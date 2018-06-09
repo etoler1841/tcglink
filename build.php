@@ -9,7 +9,7 @@
     $headers = array(
       "Authorization: bearer $token"
     );
-    curl_setopt($ch, CURLOPT_URL, "http://api.tcgplayer.com/catalog/products".$tcgpId);
+    curl_setopt($ch, CURLOPT_URL, "http://api.tcgplayer.com/catalog/products/".$tcgpId);
     curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     $response = json_decode(curl_exec($ch));
@@ -46,7 +46,7 @@
           if(!$result->num_rows){
             //Prepare variables for products tables
             $hyphenName = str_replace(array(" ", "/", "\\"), "-", str_replace(array(",", ".", "!", "?", "'", "(", ")", ":"), "", str_replace(array(" - ", " // "), "", $card->productName)));
-            $imgName = $hypenName.'.jpg';
+            $imgName = $hyphenName.'.jpg';
             $model = substr($setCode.'-'.$hyphenName, 0, 32);
 
             //products
@@ -60,7 +60,8 @@
                          manufacturers_id = 0,
                          products_quantity_mixed = 1,
                          master_categories_id = $catId,
-                         img_update = 1";
+                         img_update = 1,
+                         products_full_name = '$cardName'";
             $conn->query($stmt);
             $prodId = $conn->insert_id;
             $return['result']['prodId'] = $prodId;
@@ -86,7 +87,8 @@
 
             $ch2 = curl_init();
             curl_setopt($ch2, CURLOPT_URL, "$path/update_item.php?prodId=".$prodId);
-            curl_exec($ch2);
+            curl_setopt($ch2, CURLOPT_RETURNTRANSFER, true);
+            $a = curl_exec($ch2);
 
             //Save the product image
             $file = file_get_contents($card->image);
@@ -95,13 +97,13 @@
             }
             file_put_contents("./images/mtgsingles/$setCode/$imgName", $file);
 
-            //Create foil if needed (DO IT AGAIN!!)
+            //Create foil if needed (a.k.a. "Second verse, same as the first!")
             if(isset($foil) && isset($normal)){
               $cardName = $conn->real_escape_string($card->productName.' - Foil');
 
               //Prepare variables for products tables
               $hyphenName = str_replace(array(" ", "/", "\\"), "-", str_replace(array(",", ".", "!", "?", "'", "(", ")", ":"), "", str_replace(array(" - ", " // "), "", $card->productName)));
-              $imgName = $hypenName.'.jpg';
+              $imgName = $hyphenName.'.jpg';
               $model = str_replace("--", "-", substr($setCode.'-'.$hyphenName, 0, 27).'-Foil');
 
               //products
@@ -115,7 +117,8 @@
                            manufacturers_id = 0,
                            products_quantity_mixed = 1,
                            master_categories_id = $catId,
-                           img_update = 1";
+                           img_update = 1,
+                           products_full_name = '$cardName'";
               $conn->query($stmt);
               $prodId = $conn->insert_id;
               $return['result']['prodId_foil'] = $prodId;
@@ -141,7 +144,8 @@
 
               $ch2 = curl_init();
               curl_setopt($ch2, CURLOPT_URL, "$path/update_item.php?prodId=".$prodId);
-              curl_exec($ch2);
+              curl_setopt($ch2, CURLOPT_RETURNTRANSFER, true);
+              $a = curl_exec($ch2);
             }
             $return['status'] = 'ok';
           } else {
@@ -158,7 +162,7 @@
       }
     } else {
       $return['status'] = 'err';
-      $return['errors'][] = 'Product not found.'
+      $return['errors'][] = 'Product not found.';
     }
   } else {
     $return['status'] = 'err';

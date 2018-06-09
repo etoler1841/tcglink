@@ -15,16 +15,19 @@
     if($result->num_rows){
       $row = $result->fetch_array(MYSQLI_ASSOC);
       $cardName = $row['products_name'];
-      $prepCardName = "+[".str_replace(" ", "]+[". $cardName)."]";
+      $prepCardName = "+[".str_replace(" ", "]+[", $cardName)."]";
       $setName = $row['set_name'];
       $prepSetName = "[".$setName."]";
 
       //Find the Multiverse ID
       $ch = curl_init();
       curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-      curl_setopt($ch, CURLOPT_URL, "http://gatherer.wizards.com/Pages/Search/Default.aspx?name=".$cardName."&set=".$setName);
+      curl_setopt($ch, CURLOPT_URL, "http://gatherer.wizards.com/Pages/Search/Default.aspx?name=".$prepCardName."&set=".$prepSetName);
       $response = curl_exec($ch);
       preg_match("/<span class=\"cardTitle\">\s*<a.*?href=\"\.\.\/Card\/Details.aspx\?multiverseid=([0-9])+/si", $response, $match);
+      if(!isset($match[1])){
+        preg_match("/Object moved to <a href=.*?multiverseid%3d([0-9]+)/i", $response, $match);
+      }
       $return['result']['multiverseId'] = $match[1];
 
       //Get data from the card's individual Gatherer page
@@ -32,13 +35,16 @@
       $data = curl_exec($ch);
 
       //Start scraping
-      preg_match("/<div class=\"label\">.*?Card Name:.*?<\/div>.*?<div class=\"value\">(.*?)<\/div>/si", $gatherer, $collectorNumber);
-      preg_match("/<div.*?class=\".*?manaRow\">.*?<div class=\"value\">(.*?)<\/div>/si", $gatherer, $manaCost);
-      preg_match("/<div class=\"label\">.*?Color Indicator:.*?<\/div>.*?<div class=\"value\">(.*?)<\/div>/si", $gatherer, $colorIndicator);
-      preg_match("/<div class=\"label\">.*?Type:.*?<\/div>.*?<div class=\"value\">(.*?)<\/div>/si", $gatherer, $type);
+      preg_match("/<div class=\"label\">\s*Card Number:.*?<\/div>.*?<div[a-z,A-Z,0-9,\",_,=,\s]*?class=\"value\">(.*?)<\/div>/si", $data, $collectorNumber);
+      preg_match("/<div[a-z,A-Z,0-9,\",_,=,\s]*?class=\"row manaRow\">.*?<div class=\"value\">(.*?)<\/div>/si", $data, $manaCost);
+      preg_match("/<div class=\"label\">\s*Color Indicator:.*?<\/div>.*?<div class=\"value\">(.*?)<\/div>/si", $data, $colorIndicator);
+      preg_match("/<div class=\"label\">\s*Types:.*?<\/div>.*?<div class=\"value\">(.*?)<\/div>/si", $data, $type);
       if(strpos(trim($type[1]), '  ')) $type[1] = substr(trim($type[1]), 0, strpost(trim($type[1]), '  '));
       if(strpos($type[1], 'Basic Land')) $type[1] = 'Basic Land';
-      if(!$manaCost[1]) $manaCost[1] = "0";
+      if(!isset($manaCost[1])){
+        $manaCost = array();
+        $manaCost[1] = "0";
+      }
 
       $info = array(
         'collectorNumber' => trim($collectorNumber[1]),
@@ -46,7 +52,7 @@
         'type' => trim($type[1])
       );
       $info['colors'] = (strpos($info['type'], 'Land') === false) ? get_colors($info['manaCost']) : 'Land';
-      if($colorIndicator[1] != '') $info['colors'] = trim(color_indicator($colorIndicator[1]));
+      if(isset($colorIndicator[1])) $info['colors'] = trim(color_indicator($colorIndicator[1]));
 
       //Insert data
       $escCardName = $conn->real_escape_string($cardName);
@@ -55,8 +61,8 @@
                SET multiverse_id = ".$match[1].",
                    card_name = '$escCardName',
                    set_name = '$escSetName',
-                   type = '".$info['type']."'',
-                   collector_number = '".$info['collectorNumber']."'',
+                   type = '".$info['type']."',
+                   collector_number = '".$info['collectorNumber']."',
                    mana_cost = '".$info['collectorNumber']."',
                    colors = '".$info['colors']."'";
       $conn->query($stmt);
@@ -74,7 +80,7 @@
     }
   } else {
     $return['status'] = 'err';
-    $return['errors'][] = 'Parameter prodId is not set.';
+    $return['errors'][] = 'Parameter missing.';
   }
 
   echo json_encode($return);
@@ -83,7 +89,7 @@
     if($data === "0"){
       $cost = "0";
     } else {
-      $symbols = scrub("@<(?:.*?)alt=\"(.*?)\"@si", $data);
+      preg_match_all("/<.*?alt=\"(.*?)\"/si", $data, $symbols);
       $cost = '';
       $colors = array('White' => 'W',
                       'Blue' => 'U',
@@ -117,7 +123,7 @@
                       'Phyrexian Red' => '!R',
                       'Phyrexian Green' => '!G'
       );
-      foreach($symbols as $symbol){
+      foreach($symbols[1] as $key => $symbol){
         if(is_numeric($symbol)){
           $cost .= $symbol;
         } else {

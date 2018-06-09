@@ -8,7 +8,7 @@
   //Build the set into the database here!
   $ch = curl_init();
   $headers = array(
-    "Authorization: bearer $token";
+    "Authorization: bearer $token"
   );
   curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
   curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -49,17 +49,54 @@
                    tcgp_id = $tcgpId,
                    is_standard = $isStandard";
       $conn->query($stmt);
-    } else {
-      exit("<p>Set is already built!</p>");
     }
   } else {
     exit("<p>Set not found!</p>");
   }
 ?>
 <head>
+  <style>
+    body {
+      font-family: Tahoma, sans-serif;
+    }
 
+    table, tr, td, th {
+      border-collapse: collapse;
+      border: none;
+      font-size: .95em;
+    }
+
+    table, thead {
+      border: 1px solid black;
+    }
+
+    table img {
+      height: 35px;
+    }
+
+    tr {
+      border-bottom: 1px solid #333;
+    }
+
+    td, th {
+      padding: 5px;
+    }
+
+    #img-div {
+      position: fixed;
+      top: 0;
+      right: 0;
+      display: none;
+    }
+
+    #img-div img {
+      height: 350px;
+      width: auto;
+    }
+  </style>
 </head>
 <body>
+  <div id='img-div'></div>
   <table id='products'>
     <thead>
       <th>Image</th>
@@ -73,13 +110,13 @@
       <?php
         $ch = curl_init();
         $headers = array(
-          "Authorizaton: bearer $token"
+          "Authorization: bearer $token"
         );
         curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         $i = 0;
         do {
-          curl_setopt($ch, CURLOPT_URL, "http://api.tcgplayer.com/catalog/products?limit=100&offset=".$i*100."&groupId=".$tcgpId);
+          curl_setopt($ch, CURLOPT_URL, "http://api.tcgplayer.com/catalog/products?limit=100&offset=".($i*100)."&groupId=".$tcgpId);
           $response = json_decode(curl_exec($ch));
           foreach($response->results as $card){
             echo "<tr id=".$card->productId.">
@@ -96,29 +133,40 @@
       ?>
     </tbody>
   </table>
+  <script>
+    $(window).ready(() => {
+      let rows = $("#products tbody tr");
+      for(let i = 0, n = rows.length; i < n; i++){
+        let tcgpId = $(rows[i]).children(".tcgp-id").html();
+        $.get("./build.php?tcgpId="+tcgpId, (response) => {
+          let data = JSON.parse(response);
+          if(data.status == 'err'){
+            console.info(data.errors);
+          } else {
+            $(rows[i]).children(".product-id").html(data.result.prodId);
+            $(rows[i]).children(".product-id-foil").html(data.result.prodId_foil);
+            $.get("./gatherer_scrape.php?prodId="+data.result.prodId+"&tcgpId="+tcgpId, (response) => {
+              let data = JSON.parse(response);
+              if(data.status == 'err'){
+                console.info(data.errors);
+              } else {
+                $(rows[i]).children(".multiverse-id").html(data.result.multiverseId);
+              }
+            });
+          }
+        });
+      }
+    });
+
+    $("table img").mouseover((e) => {
+      let img = $(e.currentTarget).attr("src");
+      $("#img-div").show();
+      $("#img-div").html("<img src='"+img+"' />");
+    });
+
+    $("table img").mouseout(() => {
+      $("#img-div").hide();
+      $("#img-div").html("");
+    });
+  </script>
 </body>
-<script>
-  $(window).load(() => {
-    let rows = $("products tbody tr");
-    for(let i = 0, n = rows.length; i < n; i++){
-      let tcgpId = $(rows[i]).children(".tcgp-id").html();
-      $.get("./build.php?tcgpId="+tcgpId, (response) => {
-        let data = JSON.parse(response);
-        if(data.status == 'err'){
-          console.info(data.errors);
-        } else {
-          $(rows[i]).children(".product-id").html(data.result.prodId);
-          $(rows[i]).childreN(".product_id-foil").html(data.result.prodId_foil);
-          $.get("./gatherer_scrape.php?prodId="+data.result.prodId+"&tcpgId="+tcgpId, (response) => {
-            let data = JSON.parse(response);
-            if($data.status == 'err'){
-              console.info(data.errors);
-            } else {
-              $(rows[i]).children(".multiverse_id").html(data.result.multiverseId);
-            }
-          });
-        }
-      });
-    }
-  });
-</script>
