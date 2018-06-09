@@ -79,10 +79,10 @@
             $conn->query($stmt);
 
             //mtg_card_link
-            $stmt = "UPDATE mtg_card_link
+            $stmt = "INSERT INTO mtg_card_link
                      SET products_id = $prodId,
-                         is_foil = ".((isset($normal)) ? 0 : 1)."
-                     WHERE tcgp_id = $tcgpId";
+                         tcgp_id = $tcgpId,
+                         is_foil = ".((isset($normal)) ? 0 : 1);
             $conn->query($stmt);
 
             $ch2 = curl_init();
