@@ -4,55 +4,6 @@
 
   $tcgpId = $_GET['tcgpId'];
   $isStandard = $_GET['isStandard'];
-
-  //Build the set into the database here!
-  $ch = curl_init();
-  $headers = array(
-    "Authorization: bearer $token"
-  );
-  curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-  curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-  curl_setopt($ch, CURLOPT_URL, "http://api.tcgplayer.com/catalog/groups/".$tcgpId);
-  $response = json_decode(curl_exec($ch));
-  if($response->results){
-    $set = $response->results[0];
-    $setName = $conn->real_escape_string($set->name);
-    $setCode = $set->abbreviation;
-
-    $stmt = "SELECT 1
-             FROM mtg_sets
-             WHERE tcgp_id = ".$set->groupId;
-    $result = $conn->query($stmt);
-    if(!$result->num_rows){
-      $stmt = "INSERT INTO categories
-               SET parent_id = 458,
-                   sort_order = 0,
-                   date_added = '".date("Y-m-d H:i:s")."',
-                   categories_status = 1";
-      $conn->query($stmt);
-      $catId = $conn->insert_id;
-
-      $stmt = "INSERT INTO categories_description
-               SET categories_id = $catId,
-                   language_id = 1,
-                   categories_name = '$setName',
-                   categories_description = '',
-                   buy_list_active = 0,
-                   buy_list_order = 0,
-                   buy_list_format = ''";
-      $conn->query($stmt);
-
-      $stmt = "INSERT INTO mtg_sets
-               SET set_name = '$setName',
-                   pb_code = '$setCode',
-                   categories_id = $catId,
-                   tcgp_id = $tcgpId,
-                   is_standard = $isStandard";
-      $conn->query($stmt);
-    }
-  } else {
-    exit("<p>Set not found!</p>");
-  }
 ?>
 <head>
   <style>
@@ -96,6 +47,71 @@
   </style>
 </head>
 <body>
+  <?php
+    $ch = curl_init();
+    $headers = array(
+      "Authorization: bearer $token"
+    );
+    curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_URL, "http://api.tcgplayer.com/catalog/groups/".$tcgpId);
+    $response = json_decode(curl_exec($ch));
+    if($response->results){
+      $set = $response->results[0];
+      $setName = $conn->real_escape_string($set->name);
+      $setCode = $set->abbreviation;
+
+      $stmt = "SELECT 1
+               FROM mtg_sets
+               WHERE tcgp_id = ".$set->groupId;
+      $result = $conn->query($stmt);
+      if(!$result->num_rows){
+        $stmt = "INSERT INTO categories
+                 SET parent_id = 458,
+                     sort_order = 0,
+                     date_added = '".date("Y-m-d H:i:s")."',
+                     categories_status = 1";
+        $conn->query($stmt);
+        $catId = $conn->insert_id;
+
+        $stmt = "INSERT INTO categories_description
+                 SET categories_id = $catId,
+                     language_id = 1,
+                     categories_name = '$setName',
+                     categories_description = '',
+                     buy_list_active = 0,
+                     buy_list_order = 0,
+                     buy_list_format = ''";
+        $conn->query($stmt);
+
+        $stmt = "INSERT INTO mtg_sets
+                 SET set_name = '$setName',
+                     pb_code = '$setCode',
+                     categories_id = $catId,
+                     tcgp_id = $tcgpId,
+                     is_standard = $isStandard";
+        $conn->query($stmt);
+      }
+
+      $setSym = file_get_contents("http://gatherer.wizards.com/Handlers/Image.ashx?type=symbol&set=".$setCode."&size=large&rarity=C");
+      if(strlen($setSym) < 500){
+        $setSym = file_get_contents("http://gatherer.wizards.com/Handlers/Image.ashx?type=symbol&set=".$setCode."&size=large&rarity=M");
+        if(strlen($setSym) < 500){
+          $setSym = file_get_contents("http://gatherer.wizards.com/Handlers/Image.ashx?type=symbol&set=".$setCode."&size=large&rarity=S");
+          if(strlen($setSym) < 500){
+            unset($setSym);
+          }
+        }
+      }
+      if(isset($setSym)){
+        file_put_contents("./img/".$setCode.".jpg");
+      } else {
+        echo "<p>Set symbol not found.</p>";
+      }
+    } else {
+      exit("<p>Set not found!</p>");
+    }
+  ?>
   <div id='img-div'></div>
   <table id='products'>
     <thead>
