@@ -31,27 +31,31 @@
         $cards[$card->productId] = array(
           'name' => $card->productName
         );
+        $ids[] = $card->productId;
       }
       $i++;
     } while($response->results);
+    asort($cards);
 
     if(isset($cards)){
-      foreach($cards as $id => $data){
-        curl_setopt($ch, CURLOPT_URL, "http://api.tcgplayer.com/pricing/product/".$id);
+      $i = 0;
+      while($i < sizeof($ids)) {
+        for($j = 0; $j < 100; $i++, $j++){
+          if($i === sizeof($ids)){
+            break;
+          }
+          $search[] = $ids[$i];
+        }
+        curl_setopt($ch, CURLOPT_URL, "http://api.tcgplayer.com/pricing/product/".implode(",", $search));
         $response = json_decode(curl_exec($ch));
-        foreach($response->results as $price){
-          $cards[$id]['prices'][$price->subTypeName] = array(
-            'market' => $price->marketPrice,
-            'mid' => $price->midPrice
+        foreach($response->results as $data){
+          $cards[$data->productId]['prices'][$data->subTypeName] = array(
+            'market' => number_format($data->marketPrice, 2),
+            'mid' => number_format($data->midPrice, 2)
           );
         }
       }
     }
-    asort($cards);
-    // echo "<pre>";
-    // print_r($cards);
-    // echo "</pre>";
-    // exit();
   }
 ?>
 <head>
@@ -89,30 +93,25 @@
     </thead>
     <tbody>
     <?php foreach($cards as $id => $data){
-      foreach($data['prices'] as $name => $prices){
+      if(isset($data['prices']['Normal']) && ($data['prices']['Normal']['market'] != 0 || $data['prices']['Normal']['mid'] != 0)){
         echo "<tr>
         <td>".$id."</td>
         <td>".$data['name']."</td>
-        <td>".$name."</td>
-        <td>$".$prices['market']."</td>
-        <td>$".$prices['mid']."</td>
+        <td>Normal</td>
+        <td>$".$data['prices']['Normal']['market']."</td>
+        <td>$".$data['prices']['Normal']['mid']."</td>
+        </tr>";
+      }
+      if(isset($data['prices']['Foil']) && ($data['prices']['Foil']['market'] != 0 || $data['prices']['Foil']['mid'] != 0)){
+        echo "<tr>
+        <td>".$id."</td>
+        <td>".$data['name']."</td>
+        <td>Foil</td>
+        <td>$".$data['prices']['Foil']['market']."</td>
+        <td>$".$data['prices']['Foil']['mid']."</td>
         </tr>";
       }
     } ?>
     </tbody>
   </table>
-  <?php if($start > 0){
-    ?>
-      <button id="back">Back</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-    <?php
-  } ?><button id="next">Next</button>
-  <script>
-    $("#back").click(() => {
-      window.location.href = "?group=<?=$_GET['group']?>&page=<?=(($start+100)/100)-1?>";
-    });
-
-    $("#next").click(() => {
-      window.location.href = "?group=<?=$_GET['group']?>&page=<?=(($start+100)/100)+1?>";
-    });
-  </script>
 </body>
