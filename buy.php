@@ -230,7 +230,7 @@
         $.post("./buy_ajax.php", JSON.stringify(params), (response) => {
           let data = JSON.parse(response);
           if(!data.errors){
-            $("#products tbody").append(`
+            $("#products tbody").prepend(`
               <tr id='${data.card.prodId}' class=${data.card.foilStatus}>
                 <td class='qty'><input type='number' value='1' /></td>
                 <td class='image'><img src='../../images/${data.card.prodImage}' /></td>
@@ -345,12 +345,20 @@
       $("#cash-amt").html("$"+(Math.round(cash*100)/100).toFixed(2));
     }
 
-    //listeners
-    $(document).ready(() => {
+    function positionResults() {
       $("#search-field").focus();
       $("#search-results").css("top", $("#search-field").position().top+$("#search-field").height);
       $("#search-results").css("left", $("#search-field").position().left);
       $("#search-results").css("width", $("#search-field").width);
+    }
+
+    //listeners
+    $(document).ready(() => {
+      positionResults();
+    });
+
+    $(window).on("resize", () => {
+      positionResults();
     });
 
     $("#add-ins input").keyup((e) => {
