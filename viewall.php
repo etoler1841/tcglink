@@ -9,34 +9,50 @@
   );
   curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
   curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-  // $page = 1;
-  // do {
-  //   $values = "offset=".(($page*100)-100)."&limit=100";
-  //   curl_setopt($ch, CURLOPT_URL, "http://api.tcgplayer.com/catalog/categories/1/groups?$values");
-  //   $data = json_decode(curl_exec($ch));
-  //   $count = 0;
-  //   foreach($data->results as $group){
-  //     $count++;
-  //     echo "<option value='".$group->groupId."'";
-  //     if(isset($_GET['group']) && $group->groupId == $_GET['group']) echo " selected";
-  //     echo ">".$group->name."</option>";
-  //   }
-  //   $page++;
-  // } while ($count == 100);
   $i = 0;
   do {
     $values = "offset=".($i*100)."&limit=100";
     curl_setopt($ch, CURLOPT_URL, "http://api.tcgplayer.com/catalog/categories/1/groups?".$values);
     $response = json_decode(curl_exec($ch));
-    if($response->results){
-      $groups = $response->results;
-      foreach($groups as $group){
-        $sets[$group->groupId] = $group->name;
-      }
+    foreach($response->results as $set){
+      $sets[$set->groupId] = $set->name;
     }
     $i++;
   } while($response->results);
   asort($sets);
+
+  if(isset($_GET['group'])){
+    $i = 0;
+    do {
+      $values = "groupId=".$_GET['group']."&offset=".($i*100)."&limit=100";
+      curl_setopt($ch, CURLOPT_URL, "http://api.tcgplayer.com/catalog/products?".$values);
+      $response = json_decode(curl_exec($ch));
+      foreach($response->results as $card){
+        $cards[$card->productId] = array(
+          'name' => $card->productName
+        );
+      }
+      $i++;
+    } while($response->results);
+
+    if(isset($cards)){
+      foreach($cards as $id => $data){
+        curl_setopt($ch, CURLOPT_URL, "http://api.tcgplayer.com/pricing/product/".$id);
+        $response = json_decode(curl_exec($ch));
+        foreach($response->results as $price){
+          $cards[$id]['prices'][$price->subTypeName] = array(
+            'market' => $price->marketPrice,
+            'mid' => $price->midPrice
+          );
+        }
+      }
+    }
+    asort($cards);
+    // echo "<pre>";
+    // print_r($cards);
+    // echo "</pre>";
+    // exit();
+  }
 ?>
 <head>
   <style>
@@ -60,6 +76,7 @@
     </select>
     <input type="submit" value="submit"/>
   </form>
+  <?php if(!isset($cards)) exit(); ?>
   <table id="cards">
     <thead>
       <tr>
@@ -71,29 +88,17 @@
       </tr>
     </thead>
     <tbody>
-      <?php
-        if(isset($_GET['group'])){
-          $values = "groupId=".$_GET['group']."&offset=$start&limit=100&sortOrder=productName";
-          curl_setopt($ch, CURLOPT_URL, "http://api.tcgplayer.com/catalog/products?$values");
-          $data = json_decode(curl_exec($ch));
-          foreach($data->results as $card){
-            $productIds[] = $card->productId;
-            $products[$card->productId] = $card->productName;
-          }
-          $ids = implode(',', $productIds);
-          curl_setopt($ch, CURLOPT_URL, "http://api.tcgplayer.com/pricing/product/$ids");
-          $data = json_decode(curl_exec($ch));
-          foreach($data->results as $card){
-            echo "<tr>
-              <td>".$card->productId."</td>
-              <td>".$products[$card->productId]."</td>
-              <td>".$card->subTypeName."</td>
-              <td>$".$card->marketPrice."</td>
-              <td>$".$card->midPrice."</td>
-            </tr>";
-          }
-        }
-      ?>
+    <?php foreach($cards as $id => $data){
+      foreach($data['prices'] as $name => $prices){
+        echo "<tr>
+        <td>".$id."</td>
+        <td>".$data['name']."</td>
+        <td>".$name."</td>
+        <td>$".$prices['market']."</td>
+        <td>$".$prices['mid']."</td>
+        </tr>";
+      }
+    } ?>
     </tbody>
   </table>
   <?php if($start > 0){
