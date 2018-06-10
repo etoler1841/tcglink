@@ -233,7 +233,7 @@
             $("#products tbody").prepend(`
               <tr id='${data.card.prodId}' class=${data.card.foilStatus}>
                 <td class='qty'><input type='number' value='1' /></td>
-                <td class='image'><img src='../../images/${data.card.prodImage}' /></td>
+                <td class='image'><img src='../../images/${data.card.prodImage}' onerror='this.style.display="none"' /></td>
                 <td class='name'>${data.card.prodName}</td>
                 <td class='price'>$${data.card.price}</td>
                 <td class='current-qty'>${data.card.currentQty}</td>
@@ -269,6 +269,15 @@
             `);
           }
         }
+      });
+    }
+
+    function magnify(elem){
+      let img = $(elem).attr("src");
+      $("#img-div").show();
+      $("#img-div").html("<img src='"+$(elem).attr("src")+"' onerror='this.style.display=\"none\"' />");
+      $(elem).on("mouseout", () => {
+        $("#img-div").hide();
       });
     }
 
@@ -391,13 +400,7 @@
     });
 
     $("#products").on("mouseover", ".image img", (e) => {
-      let img = $(e.currentTarget).attr("src");
-      $("#img-div").show();
-      $("#img-div").html("<img src='"+$(e.currentTarget).attr("src")+"' onerror='this.style.display=\"none\"' />");
-    });
-
-    $("#products").on("mouseout", ".image img", (e) => {
-      $("#img-div").hide();
+      magnify(e.currentTarget);
     });
 
     $("#products").on("change keyup click", ".qty input", (e) => {
@@ -490,6 +493,10 @@
       updateTotals();
       $("#search-results").hide();
       $("#img-div").hide();
+    });
+
+    $("#search-results").on("mouseover", "img", (e) => {
+      magnify(e.currentTarget);
     });
 
     $("#set-select").change(() => {
