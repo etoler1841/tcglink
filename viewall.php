@@ -2,6 +2,41 @@
   define("SITE_ROOT", ".");
   require(SITE_ROOT.'/includes/includes.php');
   $start = (isset($_GET['page'])) ? ($_GET['page']*100)-100 : 0 ;
+
+  $ch = curl_init();
+  $headers = array(
+    "Authorization: bearer $token"
+  );
+  curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+  curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+  // $page = 1;
+  // do {
+  //   $values = "offset=".(($page*100)-100)."&limit=100";
+  //   curl_setopt($ch, CURLOPT_URL, "http://api.tcgplayer.com/catalog/categories/1/groups?$values");
+  //   $data = json_decode(curl_exec($ch));
+  //   $count = 0;
+  //   foreach($data->results as $group){
+  //     $count++;
+  //     echo "<option value='".$group->groupId."'";
+  //     if(isset($_GET['group']) && $group->groupId == $_GET['group']) echo " selected";
+  //     echo ">".$group->name."</option>";
+  //   }
+  //   $page++;
+  // } while ($count == 100);
+  $i = 0;
+  do {
+    $values = "offset=".($i*100)."&limit=100";
+    curl_setopt($ch, CURLOPT_URL, "http://api.tcgplayer.com/catalog/categories/1/groups?".$values);
+    $response = json_decode(curl_exec($ch));
+    if($response->results){
+      $groups = $response->results;
+      foreach($groups as $group){
+        $sets[$group->groupId] = $group->name;
+      }
+    }
+    $i++;
+  } while($response->results);
+  asort($sets);
 ?>
 <head>
   <style>
@@ -19,28 +54,9 @@
   <form action="" method="get">
     <select name='group'>
       <option value=''>Choose....</option>
-        <?php
-          $ch = curl_init();
-          $headers = array(
-            "Authorization: bearer $token"
-          );
-          curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-          curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-          $page = 1;
-          do {
-            $values = "offset=".(($page*100)-100)."&limit=100";
-            curl_setopt($ch, CURLOPT_URL, "http://api.tcgplayer.com/catalog/categories/1/groups?$values");
-            $data = json_decode(curl_exec($ch));
-            $count = 0;
-            foreach($data->results as $group){
-              $count++;
-              echo "<option value='".$group->groupId."'";
-              if(isset($_GET['group']) && $group->groupId == $_GET['group']) echo " selected";
-              echo ">".$group->name."</option>";
-            }
-            $page++;
-          } while ($count == 100);
-        ?>
+      <?php foreach($sets as $id => $name){
+        echo "<option value='$id'>$name</option>";
+      } ?>
     </select>
     <input type="submit" value="submit"/>
   </form>
