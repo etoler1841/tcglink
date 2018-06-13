@@ -187,7 +187,7 @@
                FROM products
                WHERE products_id = ".$data['prodId'];
       $row = $conn->query($stmt)->fetch_array(MYSQLI_NUM);
-      $filePath = '../../images/'.$row[0];
+      $filePath = $imgPath.$row[0];
       if(file_exists($filePath)){
         unlink($filePath);
       }

@@ -408,7 +408,7 @@
             <tbody>
               <?php foreach($data['cards'] as $card){
                 echo "<tr id='".$card['products_id']."' class='".$card['showcase_status'].($card['is_foil'] == 1 ? ' foil' : ' normal')."'>
-                  <td><img src='../../images/".$card['products_image']."' /></td>
+                  <td class='img'><img src='".$imgPath.$card['products_image']."' /></td>
                   <td class='tcgpId'><span class='click-edit'>".$card['tcgp_id']."</span></td>
                   <td>
                     <select class='foil-status' tabindex='-1'>
@@ -434,6 +434,13 @@
   </div>
 </body>
 <script>
+  function refresh(e){
+    let i = $(e).attr("src").indexOf("?i=");
+    let src = (i === -1) ? $(e).attr("src") : $(e).attr("src").substring(0, i);
+
+    $(e).attr("src", src+"?i="+new Date().getTime());
+  }
+
   $(window).on("load resize", () => {
     $("#note").css("left", ($("#search").position().left-250)+"px");
     $("#note").css("top", ($("#search").position().top-5)+"px");
@@ -449,7 +456,7 @@
   $("body").on("blur", ".click-edit-field", (e) => {
     let val = $(e.currentTarget).val();
     let id = $(e.currentTarget).parent().parent().attr("id");
-    //hidden function
+    //hidden functions
     if(val == 'foil'){
       let params = {
         'method': 'makeFoil',
@@ -461,7 +468,7 @@
           let card = data.card;
           $("#"+id).after(`
             <tr id='${card.prodId}' class='${card.showcaseStatus} foil'>
-              <td><img src='../../images/${card.prodImg}' /></td>
+              <td class='img'><img src='<?=$imgPath?>${card.prodImg}' /></td>
               <td class='tcgpId'><span class='click-edit'>${card.tcgpId}</span></td>
               <td>
                 <select class='foil-status' tabindex='-1'>
@@ -488,9 +495,13 @@
         'method': 'newImg',
         'prodId': id
       };
-      $.post("./load_ajax.php", JSON.stringify(params));
-      let old = $(".click-edit-field").attr("class").replace("click-edit-field val_", "");
-      $(".click-edit-field").parent().html("<span class='click-edit'>"+old+"</span>");
+      $.post("./load_ajax.php", JSON.stringify(params), () => {
+        let img = $(".click-edit-field").parent().siblings(".img").children("img");
+        refresh(img);
+        let old = $(".click-edit-field").attr("class").replace("click-edit-field val_", "");
+        $(".click-edit-field").parent().html("<span class='click-edit'>"+old+"</span>");
+      });
+      return;
     }
     let prop = $(e.currentTarget).parent().attr("class");
     let params = {
@@ -501,6 +512,8 @@
     };
     $.post("./load_ajax.php", JSON.stringify(params), (response) => {
       let data = JSON.parse(response);
+      let img = $(".click-edit-field").parent().siblings(".img").children("img");
+      refresh(img);
       if(!data.errors){
         $(e.currentTarget).parent().siblings(".price").html("$"+data.new_price).removeClass("new old ancient").addClass("new");
         $(e.currentTarget).parent().html("<span class='click-edit'>"+val+"</span>");
