@@ -30,7 +30,7 @@
            WHERE products_id = $prodId";
   $row = $conn->query($stmt)->fetch_array(MYSQLI_NUM);
   $filePath = $imgPath.$row[0];
-  if(!file_exists($filePath) || filesize($filePath) < 500){
+  if(!file_exists($filePath) || filesize($filePath) < 1000){
     curl_setopt($ch, CURLOPT_URL, "http://api.tcgplayer.com/catalog/products/$tcgpID");
     $response = json_decode(curl_exec($ch));
     if(sizeof($response->results)){
