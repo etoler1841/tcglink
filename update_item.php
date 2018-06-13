@@ -25,48 +25,20 @@
   curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
   curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 
-  //check ID
-  // $stmt = "SELECT pd.products_name, s.tcgp_id, p.products_quantity
-  //          FROM products p
-  //          LEFT JOIN products_description pd ON p.products_id = pd.products_id
-  //          LEFT JOIN mtg_sets s ON p.master_categories_id = s.categories_id
-  //          WHERE p.products_id = $prodId";
-  // $row = $conn->query($stmt)->fetch_array(MYSQLI_NUM);
-  // curl_setopt($ch, CURLOPT_URL, "http://api.tcgplayer.com/catalog/products/$tcgpID");
-  // $data = json_decode(curl_exec($ch));
-  // if($data->results[0]->productName != $row[0] || $data->results[0]->groupId != $row[1]){
-  //   $values = "groupId=".$row[1]."&productName=".str_replace(" ", "%20", htmlspecialchars(str_replace(array(" - Foil", "!", "?"), "", $row[0]), ENT_QUOTES));
-  //   curl_setopt($ch, CURLOPT_URL, "http://api.tcgplayer.com/catalog/products?$values");
-  //   $data2 = json_decode(curl_exec($ch));
-  //   if(!$data2->results){
-  //     if($row[2] == 0){
-  //       $stmt = "DELETE FROM products WHERE products_id = $prodId";
-  //       $conn->query($stmt);
-  //       $stmt = "DELETE FROM products_description WHERE products_id = $prodId";
-  //       $conn->query($stmt);
-  //       $stmt = "DELETE FROM products_to_categories WHERE products_id = $prodId";
-  //       $conn->query($stmt);
-  //       $stmt = "DELETE FROM products_description WHERE products_id = $prodId";
-  //       $conn->query($stmt);
-  //       $stmt = "DELETE FROM mtg_card_link WHERE products_id = $prodId";
-  //       $conn->query($stmt);
-  //       $stmt = "DELETE FROM mtg_update_errors WHERE products_id = $prodId";
-  //       $conn->query($stmt);
-  //       exit('<p>'.$prodId.' does not exist; deleted from database.</p>');
-  //     }
-  //     exit('<p>'.$prodId.' not found: '.$values.'</p>');
-  //   }
-  //   if($data2->results[0]->productId != $tcgpID){
-  //     $stmt = "UPDATE mtg_card_link
-  //              SET tcgp_id = ".$data2->results[0]->productId."
-  //              WHERE products_id = $prodId";
-  //     $conn->query($stmt);
-  //     $tcgpID = $data2->results[0]->productId;
-  //     echo '<p>'.$prodId.' TCGPlayer ID changed</p>';
-  //   }
-  // }
+  $stmt = "SELECT products_image
+           FROM products
+           WHERE products_id = $prodId";
+  $row = $conn->query($stmt)->fetch_array(MYSQLI_NUM);
+  $filePath = './images/'.$row[0];
+  if(!file_exists($filePath) || filesize($filePath) < 500){
+    curl_setopt($ch, CURLOPT_URL, "http://api.tcgplayer.com/catalog/products/$tcgpID");
+    $response = json_decode(curl_exec($ch));
+    if(sizeof($response->results)){
+      $img = file_get_contents($response->results[0]->image);
+      file_put_contents($filePath, $img);
+    }
+  }
 
-  //get price and update
   curl_setopt($ch, CURLOPT_URL, "http://api.tcgplayer.com/pricing/product/$tcgpID");
   $data = json_decode(curl_exec($ch));
   if(sizeof($data->errors) > 0){
@@ -83,28 +55,6 @@
     $error = 1;
     foreach($data->results as $price){
       if($price->subTypeName == $cond){
-        // if($price->midPrice == '' && $price->marketPrice == ''){
-        //   $newCond = ($cond == 'Foil') ? 0 : 1 ;
-        //   $stmt = "UPDATE mtg_card_link
-        //   SET is_foil = $newCond
-        //   WHERE products_id = $prodId";
-        //   $conn->query($stmt);
-        //   echo $stmt;
-        //   if($conn->error){
-        //     $err = $conn->real_escape_string($conn->error);
-        //     $query = $conn->real_escape_string($stmt);
-        //     $stmt = "INSERT INTO mtg_update_errors
-        //              SET products_id = $prodId,
-        //                  error = '$err',
-        //                  query = '$query'";
-        //     $conn->query($stmt);
-        //     echo '<p>'.$prodId.' error: '.$conn->error.'</p>';
-        //   } else {
-        //     $newCondText = ($newCond == 0) ? 'Normal' : 'Foil' ;
-        //     echo '<p>'.$prodId.' condition changed to '.$newCondText.'.</p>';
-        //   }
-        //   exit();
-        // }
         if($price->midPrice > $price->marketPrice*1.33 || ($price->marketPrice > 150 && $price->midPrice && $price->marketPrice < $price->midPrice)){
           $error = 0;
           if($price->midPrice < .22 && $cond == 'Normal'){

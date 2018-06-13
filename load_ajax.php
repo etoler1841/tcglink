@@ -182,6 +182,24 @@
         'price' => number_format($price, 2)
       );
       break;
+    case 'newImg':
+      $stmt = "SELECT products_image
+               FROM products
+               WHERE products_id = ".$data['prodId'];
+      $row = $conn->query($stmt)->fetch_array(MYSQLI_NUM);
+      $filePath = './images/'.$row[0];
+      if(file_exists($filePath)){
+        unlink($filePath);
+      }
+      $ch = curl_init();
+      curl_setopt($ch, CURLOPT_URL, "$path/update_item.php?prodId=".$data['prodId']);
+      curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+      curl_exec($ch);
+      $return['status'] = 'ok';
+      break;
+    default:
+      $return['status'] = 'err';
+      $return['errors'][] = 'Action not recognized';
   }
 
   echo json_encode($return);
