@@ -483,6 +483,15 @@
       $(".click-edit-field").parent().html("<span class='click-edit'>"+old+"</span>");
       return;
     }
+    if(val == 'img'){
+      let params = {
+        'method': 'newImg',
+        'prodId': id
+      };
+      $.post("./load_ajax.php", JSON.stringify(params));
+      let old = $(".click-edit-field").attr("class").replace("click-edit-field val_", "");
+      $(".click-edit-field").parent().html("<span class='click-edit'>"+old+"</span>");
+    }
     let prop = $(e.currentTarget).parent().attr("class");
     let params = {
       'method': 'update',
