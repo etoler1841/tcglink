@@ -421,7 +421,7 @@
                     echo "<td class='".$store."-qty'>".$qty."</td>";
                   }
                   echo "<td class='qty'><input type='number' /></td>
-                  <td><button class='label-print' tabindex='-1'>Print</button></td>
+                  <td class='print'><button class='label-print' tabindex='-1'>Print</button></td>
                   <td class='price ".$card['update_status']."'>$".$card['products_price']."</td>
                 </tr>";
               } ?>
@@ -480,7 +480,7 @@
               <td class='bayou-qty'>0</td>
               <td class='nine-mile-qty'>0</td>
               <td class='qty'><input type='number' /></td>
-              <td><button class='label-print' tabindex='-1'>Print</button></td>
+              <td class='print'><button class='label-print' tabindex='-1'>Print</button></td>
               <td class='price new'>$${card.price}</td>
             </tr>
           `);
@@ -552,6 +552,9 @@
   });
 
   $("#cardData").on("keyup", ".qty input", (e) => {
+    if(e.which == 80){
+      $(e.currentTarget).parent().siblings(".print").children(".label-print").click();
+    }
     if(e.which == 13){
       $("#save").click();
     }
