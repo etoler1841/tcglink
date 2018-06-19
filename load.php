@@ -52,8 +52,6 @@
   }
 
   if((isset($_GET['search']) && $_GET['search'] != '') || (isset($_GET['set']) && $_GET['set'] != '')){
-    $ch = curl_init();
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     $stmt = "SELECT cl.products_id, p.products_image, cl.tcgp_id, cl.is_foil, pd.products_name, s.pb_code, p.products_quantity, i.product_stock, p.products_price, p.foil_last_update, s.is_standard
              FROM mtg_card_link cl
              LEFT JOIN products p ON cl.products_id = p.products_id
@@ -147,7 +145,6 @@
       top: 0;
       right: 0;
       z-index: 1;
-      width: 216px;
       height: 300px;
     }
 
@@ -241,37 +238,23 @@
       background-color: #9f9;
     }
 
+    .build-btn {
+      position: fixed;
+      bottom: 80px;
+      right: 15px;
+      width: 125px;
+      height: 50px;
+      background-color: #ffc;
+      border: solid 1px #ff9;
+      border-radius: 2px;
+    }
+
+    .build-btn:hover {
+      background-color: #ff9;
+    }
+
     input[type=number] {
       width: 50px;
-    }
-
-    #note {
-      background-color: #cfc;
-      border-radius: 35px 0 0 35px;
-      height: 30px;
-      width: 200px;
-      position: absolute;
-      top: 275px;
-    }
-
-    #note span {
-      position: relative;
-      top: 5px;
-      left: 10px;
-    }
-
-    #note:after {
-      content: '';
-      font-size: 0;
-      width: 0;
-      height: 0;
-      position: relative;
-      top: 0px;
-      left: 35px;
-      border-top: 35px solid transparent;
-      border-bottom: 35px solid transparent;
-      border-left: 35px solid #cfc;
-      border-radius: 0;
     }
 
     #modal-bg {
@@ -329,9 +312,6 @@
 <body>
   <script src='http://labelwriter.com/software/dls/sdk/js/DYMO.Label.Framework.latest.js'></script>
   <script src='./includes/dymo.js'></script>
-  <?php if(!isset($_GET['set']) && !isset($_GET['search'])){
-    echo "<div id='note'><span>Yes, this actually works.</span></div>";
-  } ?>
   <div id='img-div'></div>
   <div id='modal-bg'></div>
   <div id='progress'>
@@ -428,6 +408,7 @@
             </tbody>
           </table>
         </div>
+        <button id='build' class='build-btn'>Build missing</button>
         <button id='save' class='save-btn'>Save changes</button> <?php
       }
     ?>
@@ -619,6 +600,10 @@
     $(document).ajaxStop(() => {
       window.location.href = "?";
     });
+  });
+
+  $("#build").click(() => {
+    window.open("<?=$path?>/missing_cards.php?catId=<?=$_GET['set']?>", "_blank");
   });
 
   $("#search").keyup((e) => {
