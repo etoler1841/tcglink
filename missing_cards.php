@@ -5,7 +5,7 @@
     exit("Missing parameter.");
   }
   $page = (isset($_GET['page'])) ? $_GET['page'] : 0;
-  $limit = (isset($_GET['limit'])) ? $_GET['limit'] : 5;
+  $limit = (isset($_GET['limit'])) ? $_GET['limit'] : 1;
 
   $ch = $ch2 = curl_init();
   $headers = array(
