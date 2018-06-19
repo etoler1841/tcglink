@@ -23,15 +23,15 @@
                            WHERE cl.tcgp_id = ?
                            AND pd.products_name NOT LIKE '%- Foil'");
   $result = $conn->query($stmt);
-  if($result->num_rows == 0){
-    exit("Finished");
-  }
   while($row = $result->fetch_array(MYSQLI_NUM)){
     $i = $j = $k = 0;
-    do {
+    while($i < $limit) {
       $values = 'groupId='.$row[0].'&limit='.$limit.'&offset='.($i+($page*$limit));
       curl_setopt($ch, CURLOPT_URL, "http://api.tcgplayer.com/catalog/products?$values");
       $data = json_decode(curl_exec($ch));
+      if(!sizeof($data->results)){
+        exit("Finished");
+      }
       foreach($data->results as $card){
         $i++;
         $stmt2->bind_param("i", $card->productId);
@@ -51,7 +51,7 @@
           $j++;
         }
       }
-    } while ($i < $limit);
+    }
   }
   echo "$i cards found. $j cards built, plus $k foils.";
 ?>
