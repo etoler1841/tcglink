@@ -5,7 +5,7 @@
     exit("Missing parameter.");
   }
   $page = (isset($_GET['page'])) ? $_GET['page'] : 0;
-  $limit = (isset($_GET['limit'])) ? $_GET['limit'] : 1;
+  $limit = (isset($_GET['limit'])) ? $_GET['limit'] : 20;
 
   $ch = $ch2 = curl_init();
   $headers = array(
@@ -30,7 +30,11 @@
       curl_setopt($ch, CURLOPT_URL, "http://api.tcgplayer.com/catalog/products?$values");
       $data = json_decode(curl_exec($ch));
       if(!sizeof($data->results)){
-        exit("Finished");
+        exit("<script>
+          $(window).load(() => {
+            window.close();
+          });
+        </script>");
       }
       foreach($data->results as $card){
         $i++;
