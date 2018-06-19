@@ -30,7 +30,11 @@
       curl_setopt($ch, CURLOPT_URL, "http://api.tcgplayer.com/catalog/products?$values");
       $data = json_decode(curl_exec($ch));
       if(!sizeof($data->results)){
-        exit("Finished");
+        exit("<script>
+          $(window).load(() => {
+            window.close();
+          });
+        </script>");
       }
       foreach($data->results as $card){
         $i++;
