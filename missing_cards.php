@@ -1,6 +1,9 @@
 <?php
   define("SITE_ROOT", '.');
   require(SITE_ROOT.'/includes/includes.php');
+  if(!isset($_GET['catId'])){
+    exit("Missing parameter.");
+  }
   $page = (isset($_GET['page'])) ? $_GET['page'] : 0;
   $limit = (isset($_GET['limit'])) ? $_GET['limit'] : 20;
 
@@ -11,10 +14,9 @@
   curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
   curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
   $stmt = "SELECT tcgp_id
-           FROM mtg_sets";
-  if(isset($_GET['catId'])) $stmt .= " WHERE categories_id = ".$_GET['catId'];
-  $stmt .= " ORDER BY set_name ASC
-             LIMIT ".($page*$limit).", 1";
+           FROM mtg_sets
+           WHERE categories_id = ".$_GET['catId']."
+           ORDER BY set_name ASC";
   $stmt2 = $conn->prepare("SELECT 1
                            FROM mtg_card_link cl
                            LEFT JOIN products_description pd ON cl.products_id = pd.products_id
