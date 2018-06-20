@@ -114,7 +114,7 @@
       $.post("./login_check.php", JSON.stringify(params), (r) => {
         if(r.status === 'ok'){
           if(r.passUpdate){
-            window.location.href = 'passChange.php<?php if(isset($_GET['ref'])) echo '?ref='.$_GET['ref']; ?>'
+            window.location.href = 'pass_change.php<?php if(isset($_GET['ref'])) echo '?ref='.$_GET['ref']; ?>'
           } else {
             window.location.href = '<?= isset($_GET['ref']) ? $_GET['ref'] : 'index.php'; ?>';
           }
