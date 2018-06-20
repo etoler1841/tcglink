@@ -25,5 +25,5 @@
     $return['status'] = 'err';
     $return['errors'][] = 'Invalid password';
   }
-  echo json_encode($return, JSON_PRETTY_PRINT);
+  echo json_encode($return);
 ?>
