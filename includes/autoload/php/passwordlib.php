@@ -27,8 +27,8 @@ if (!function_exists('password_hash')){
 }
 
 if (!function_exists('password_verify')){
-    function password_verify($password, $verify, $hash=PASSWORD_DEFAULT){
-        return (crypt($password, $hash) === $verify);
+    function password_verify($password, $hash){
+        return (crypt($password, $hash) === $hash);
     }
 }
 
