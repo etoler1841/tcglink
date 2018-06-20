@@ -603,7 +603,7 @@
   });
 
   $("#build").click(() => {
-    window.open("<?=$path?>/missing_cards.php?catId=<?=$_GET['set']?>", "_blank");
+    window.open("<?=$path?>/missing_cards.php?catId=<?php if(isset($_GET['set'])) echo $_GET['set']?>", "_blank");
   });
 
   $("#search").keyup((e) => {
