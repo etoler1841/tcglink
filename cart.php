@@ -8,9 +8,9 @@
     body {
       display: flex;
       flex-flow: column nowrap;
-      justify-content: center;
-      align-items: flex-start;
-      align-content: center;
+      justify-content: flex-start;
+      align-items: center;
+      align-content: flex-start;
     }
 
     #container {
@@ -25,8 +25,11 @@
 </head>
 <body>
   <div id="container">
-    <input type="text" id="sku" />
+    <input type="text" id="sku" placeholder="Scan..." />
     <button id="submit">Submit</button>
+  </div>
+  <div id="cart">
+
   </div>
   <script>
     $("#sku").on("keyup", (e) => {
@@ -44,8 +47,11 @@
         sku: sku
       };
       $.post("./cart_ajax.php", JSON.stringify(params), (r) => {
+        console.log(r);
         if(r.status === 'ok'){
-
+          $("#cart").prepend(`<p>
+            ${r.result.name} [${r.result.set}] ($${r.result.price})
+          </p>`);
         } else if (r.status === 'err'){
           console.log(r.errors);
         }
