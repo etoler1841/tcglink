@@ -105,7 +105,7 @@
   <script>
     $("#change").click(verify);
     $("input").on("keyup", (e) => {
-      if(e.which === 13) verfiy();
+      if(e.which === 13) verify();
     });
 
     function verify(){
