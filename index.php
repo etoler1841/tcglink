@@ -25,6 +25,15 @@
       align-content: center;
     }
 
+    #logout {
+      position: fixed;
+      left: 15px;
+      bottom: 15px;
+      font-size: 1em;
+      width: 100px;
+      text-align: center;
+    }
+
     h1 {
       color: white;
       border: 3px solid #333;
@@ -43,7 +52,7 @@
       text-align: center;
     }
 
-    li a {
+    a {
       font-size: 1.3em;
       width: 250px;
       border: 3px solid #333;
@@ -56,7 +65,7 @@
       display: inline-block;
     }
 
-    li a:hover {
+    a:hover {
       background-color: #ff9;
     }
   </style>
@@ -73,5 +82,12 @@
       <li><a href='./viewall.php'>View All TCGPlayer Data</a></li>
     </ul>
   </div>
+  <a href="javascript:void(0);" id="logout">Logout</a>
+  <script>
+    $("#logout").click(() => {
+      document.cookie = "tcglink_user=; expires=Thu, 01 Jan 1970 00:00:01 GMT;";
+      window.location.reload();
+    });
+  </script>
 </body>
 </html>

@@ -61,6 +61,16 @@
       background-color: #eee;
     }
 
+    #note {
+      background-color: #dfd;
+      border: 2px solid #9f9;
+      border-radius: 5px;
+      padding: 5px;
+      margin: 15px;
+      max-width: 300px;
+      text-align: center;
+    }
+
     #warning {
       background-color: #fdd;
       border: 2px solid #f99;
@@ -85,6 +95,7 @@
       </div>
       <button id="login">Login</button>
     </div>
+    <div id="note">Your username is your first inital and last name. Your default password is your 10-digit phone number.</div>
     <div id="warning"></div>
   </div>
   <script>
@@ -102,9 +113,13 @@
       };
       $.post("./login_check.php", JSON.stringify(params), (r) => {
         if(r.status === 'ok'){
-          window.location.href = './index.php';
-        } else {
-          $("#warning").html("Invalid username or password").show();
+          if(r.passUpdate){
+            window.location.href = 'passChange.php<?php if(isset($_GET['ref'])) echo '?ref='.$_GET['ref']; ?>'
+          } else {
+            window.location.href = '<?= isset($_GET['ref']) ? $_GET['ref'] : 'index.php'; ?>';
+          }
+        } else if(r.status === 'err'){
+          $("#warning").html(r.errors[0]).show();
           $("#pass").val("");
         }
       });
