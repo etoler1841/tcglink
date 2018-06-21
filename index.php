@@ -76,9 +76,9 @@
     <ul>
       <li><a href='./buy.php'>Buy MTG</a></li>
       <li><a href='./load.php'>Load MTG</a></li>
-      <li><a href='./new_sets.php'>Build New Sets</a></li>
-      <li><a href='../CantonmentInventory/mtgcart.php'>MTG Cart</a></li>
+      <li><a href='./cart.php'>MTG Cart</a></li>
       <li><a href='./labels.php'>Print MTG Labels</a></li>
+      <li><a href='./new_sets.php'>Build New Sets</a></li>
       <li><a href='./viewall.php'>View All TCGPlayer Data</a></li>
     </ul>
   </div>
