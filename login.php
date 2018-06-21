@@ -95,7 +95,7 @@
       </div>
       <button id="login">Login</button>
     </div>
-    <div id="note">Your username is your first inital and last name. Your default password is your 10-digit phone number.</div>
+    <div id="note">Your username is your first initial and last name. Your default password is your 10-digit phone number.</div>
     <div id="warning"></div>
   </div>
   <script>
