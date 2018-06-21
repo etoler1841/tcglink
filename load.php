@@ -525,7 +525,7 @@
 
   $("#cardData").on("mouseover", "img", (e) => {
     let img = $(e.currentTarget).attr("src");
-    $("#img-div").html("<img src='"+img+"' />")
+    $("#img-div").html("<img src='"+img+"' />");
   });
 
   $("#cardData").on("mouseout", "img", (e) => {

@@ -7,23 +7,29 @@
 
   switch($data['action']){
     case 'add':
-      $stmt = $conn->prepare("SELECT pd.products_name, s.set_name, p.products_price
+      $stmt = $conn->prepare("SELECT pd.products_name, s.set_name, p.products_price, p.products_image
                               FROM products p
                               LEFT JOIN products_description pd ON p.products_id = pd.products_id
                               LEFT JOIN mtg_sets s ON p.master_categories_id = s.categories_id
                               WHERE p.products_id = ?");
       $stmt->bind_param("i", $data['sku']);
       $stmt->execute();
-      $stmt->bind_result($name, $set, $price);
+      $stmt->bind_result($name, $set, $price, $img);
       $stmt->store_result();
       if($stmt->num_rows){
         $stmt->fetch();
-        $return['status'] = 'ok';
-        $return['result'] = array(
-          'name' => $name,
-          'set' => $set,
-          'price' => number_format($price, 2)
-        );
+        if($set){
+          $return['status'] = 'ok';
+          $return['result'] = array(
+            'name' => $name,
+            'set' => $set,
+            'price' => number_format($price, 2),
+            'img' => $img
+          );
+        } else {
+          $return['status'] = 'err';
+          $return['errors'][] = 'Product is not in an MTG set.';
+        }
       } else {
         $return['status'] = 'err';
         $return['errors'][] = 'Product not found.';
