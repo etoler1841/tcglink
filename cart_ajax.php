@@ -35,6 +35,31 @@
         $return['errors'][] = 'Product not found.';
       }
       break;
+    case 'remove':
+      $stmt = "UPDATE products
+               SET products_quantity = products_quantity - ".$data['qty']."
+               WHERE products_id = ".$data['prodId'];
+      $conn->query($stmt);
+      if($conn->error){
+        $return['status'] = 'err';
+        $return['errors'][] = $conn->error;
+        break;
+      }
+      $stmt = "SELECT products_quantity
+               FROM products
+               WHERE products_id = ".$data['prodId'];
+      $row = $conn->query($stmt)->fetch_array(MYSQLI_NUM);
+      if($row[0] <= 0){
+        $stmt = "UPDATE products
+                 SET products_quantity = 0,
+                     products_status = 0
+                 WHERE products_id = ".$data['prodId'];
+        $conn->query($stmt);
+      }
+      if(!$conn->error){
+        $return['status'] = 'ok';
+      }
+      break;
     default:
       $return['status'] = 'err';
       $return['errors'][] = 'Action not recognized.';

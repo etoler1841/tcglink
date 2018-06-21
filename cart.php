@@ -49,8 +49,21 @@
     }
 
     #totals {
-      display: flex;
-      justify-content: space-around;
+      border: none;
+      min-width: auto;
+      margin: 0;
+    }
+
+    #totals tr {
+      border: none;
+    }
+
+    #totals th {
+      text-align: right;
+    }
+
+    #totals td {
+      text-align: left;
     }
 
     #img-div {
@@ -92,17 +105,27 @@
         <th>Line Total</th>
       </tr>
     </thead>
-    <tbody>
+    <tbody id="items">
 
     </tbody>
     <tfoot>
       <tr>
-        <td colspan="6">
-          <span id="totals">
-            <span class="subtotal">Subtotal: $<span class="amt">0.00</span></span>
-            <span class="tax">Tax: $<span class="amt">0.00</span></span>
-            <span class="grand">Grand Total: $<span class="amt">0.00</span></span>
-          </span>
+        <td colspan="5"></td>
+        <td>
+          <table id="totals">
+            <tr class="subtotal">
+              <th>Subtotal:</th>
+              <td class="amt">$0.00</td>
+            </tr>
+            <tr class="tax">
+              <th>Tax:</th>
+              <td class="amt">$0.00</td>
+            </tr>
+            <tr class="grand">
+              <th>Grand Total:</th>
+              <td class="amt">$0.00</td>
+            </tr>
+          </table>
         </td>
       </tr>
       <tr>
@@ -123,7 +146,7 @@
 
     $("#empty").click(clearCart);
 
-    $("#cart").on("change keyup click", ".qty", (e) => {
+    $("#items").on("change keyup click", ".qty", (e) => {
       let elem = e.currentTarget;
       let row = $(elem).parent().parent();
       if($(elem).val() == 0){
@@ -135,25 +158,44 @@
       }
     });
 
-    $("#cart").on("mouseover", "img", (e) => {
+    $("#items").on("mouseover", "img", (e) => {
       let img = $(e.currentTarget).attr("src");
       $("#img-div").html("<img src='"+img+"' />").show();
     });
 
-    $("#cart").on("mouseout", "img", () => {
+    $("#items").on("mouseout", "img", () => {
       $("#img-div").hide();
+    });
+
+    $("#checkout").click(() => {
+      let rows = $("#cart tbody tr");
+      for(let i = 0; i < rows.length; i++){
+        let params = {
+          action: 'remove',
+          prodId: $(rows[i]).attr("id"),
+          qty: $(rows[i]).children().children(".qty").val()
+        };
+        $.post("./cart_ajax.php", JSON.stringify(params), (r) => {
+          if(r.status === 'ok'){
+            $(rows[i]).remove();
+            totals();
+          } else {
+            console.log(r.errors);
+          }
+        });
+      }
     });
 
     function increment(sku){
       let e = $("#"+sku+" .qty");
       let q = parseInt($(e).val())+1;
-      let p = floatMoney($("#"+sku+" .price-ea").html());
+      let p = stripMoney($("#"+sku+" .price-ea").html());
       $(e).val(q);
       lineTotal(sku);
     }
 
     function addToCart(){
-      let sku = $("#sku").val();
+      let sku = $("#sku").val().replace(/\D/g, "");
       if($("#"+sku).length){
         increment(sku);
       } else {
@@ -163,13 +205,13 @@
         };
         $.post("./cart_ajax.php", JSON.stringify(params), (r) => {
           if(r.status === 'ok'){
-            $("#cart tbody").prepend(`<tr id="${sku}">
-            <td><input type="number" class="qty" value="1" /></td>
-            <td><img src="<?=$imgPath?>${r.result.img}" onerror="this.style.display = 'none'" /></td>
-            <td>${r.result.name}</td>
-            <td>${r.result.set}</td>
-            <td class="price-ea">$${r.result.price}</td>
-            <td class="price-line">$${r.result.price}</td>
+            $("#items").prepend(`<tr id="${sku}">
+              <td><input type="number" class="qty" value="1" /></td>
+              <td><img src="<?=$imgPath?>${r.result.img}" onerror="this.style.display = 'none'" /></td>
+              <td>${r.result.name}</td>
+              <td>${r.result.set}</td>
+              <td class="price-ea">$${r.result.price}</td>
+              <td class="price-line">$${r.result.price}</td>
             </tr>`);
             totals();
           } else if (r.status === 'err'){
@@ -181,46 +223,45 @@
     }
 
     function clearCart(){
-      $("#cart tbody").html("");
+      $("#items").html("");
       totals();
     }
 
     function lineTotal(sku){
-      let p = floatMoney($("#"+sku+" .price-ea").html());
+      let p = stripMoney($("#"+sku+" .price-ea").html());
       let q = $("#"+sku+" .qty").val();
-      let line = floatMoney(p*q);
+      let line = parseFloat(p*q).toFixed(2);
       $("#"+sku+" .price-line").html("$"+line);
       totals();
     }
 
     function totals(){
-      let rows = $("#cart tbody tr") || null;
+      let rows = $("#items tr") || null;
       let subtotal = 0;
       let tax = 0;
       let grand = 0;
       if(rows.length){
         for(let i = 0; i < rows.length; i++){
-          let line = floatMoney($(rows[i]).children(".price-line").html());
+          let line = stripMoney($(rows[i]).children(".price-line").html());
           subtotal = (parseFloat(subtotal)+parseFloat(line)).toFixed(2);
         }
-        tax = floatMoney(subtotal*.075);
-        grand = floatMoney(subtotal*1.075);
+        tax = stripMoney(subtotal*.075);
+        grand = stripMoney(subtotal*1.075);
       }
-      $("#totals .subtotal .amt").html(floatMoney(subtotal));
-      $("#totals .tax .amt").html(floatMoney(tax));
-      $("#totals .grand .amt").html(floatMoney(grand));
+      $("#totals .subtotal .amt").html("$"+parseFloat(subtotal).toFixed(2));
+      $("#totals .tax .amt").html("$"+parseFloat(tax).toFixed(2));
+      $("#totals .grand .amt").html("$"+parseFloat(grand).toFixed(2));
     }
 
-    //Returns float val (no "$")
-    function floatMoney(m){
+    //Returns numeric val as string (no "$")
+    function stripMoney(m){
       m = String(m).replace("$", "");
       if(m == 0){
         return parseFloat(0.00);
       }
       m = parseFloat(m);
       m = Math.round(m*100)/100;
-      return parseFloat(m).toFixed(2);
-      // return m;
+      return m;
     }
   </script>
 </body>
