@@ -93,24 +93,35 @@
       border-bottom: solid 1px #666;
     }
 
-    #products table .qty {
+    #products table thead .qty {
       width: 10%;
     }
 
-    #products table .image {
+    #products table thead .image {
       width: 10%;
     }
 
-    #products table .name {
-      width: 50%;
+    #products table thead .name {
+      width: 40%;
     }
 
-    #products table .price {
+    #products table thead .price {
       width: 15%;
     }
 
-    #products table .current-qty {
+    #products table thead .current-qty {
+      width: 10%;
+    }
+
+    #products table thead .trade-val {
       width: 15%;
+    }
+
+    #products table tbody .trade-val {
+      display: flex;
+      flex-flow: column wrap;
+      justify-content: center;
+      align-items: stretch;
     }
 
     #search-results {
@@ -226,6 +237,7 @@
           <th class='name'>Item</th>
           <th class='price'>Price</th>
           <th class='current-qty'>Current Qty.</th>
+          <th class='trade-val'>Trade Value (ea.)</th>
         </thead>
         <tbody>
 
@@ -255,6 +267,7 @@
                 <td class='name'>${data.card.prodName}</td>
                 <td class='price'>$${data.card.price}</td>
                 <td class='current-qty'>${data.card.currentQty}</td>
+                <td class='trade-val'></td>
               </tr>
             `);
             updateTotals();
@@ -279,7 +292,6 @@
           $("#search-results").show();
           $("#search-results").html('');
           for(card of data.cards){
-            console.log(card);
             $("#search-results").append(`
               <div class='search-result' id='res_${card.prodId}'>
                 <img src='<?=$imgPath?>/${card.prodImg}' onerror='this.style.display="none"' class='card-img' />
@@ -339,39 +351,49 @@
         let price = parseFloat($(rows[i]).children(".price").html().replace("$", ""));
         let j = $(rows[i]).children(".qty").children("input").val();
         let k = parseInt($(rows[i]).children(".current-qty").html());
+        let lineTotal = lineSingles = lineStoreCredit = lineCash = 0;
         for(l = 0; l < j; l++, k++){
           switch(true){
             case k < 8:
-              total += price;
-              singles += price*.66;
-              storeCredit += price*.6;
-              cash += price*.5;
+              lineTotal += price;
+              lineSingles += price*.66;
+              lineStoreCredit += price*.6;
+              lineCash += price*.5;
               break;
             case k < 12:
-              total += price;
-              singles += price*.55;
-              storeCredit += price*.5;
-              cash += price*.4;
+              lineTotal += price;
+              lineSingles += price*.55;
+              lineStoreCredit += price*.5;
+              lineCash += price*.4;
               break;
             case k < 20:
-              total += price;
-              singles += price*.44;
-              storeCredit += price*.4;
-              cash += price*.35;
+              lineTotal += price;
+              lineSingles += price*.44;
+              lineStoreCredit += price*.4;
+              lineCash += price*.35;
               break;
             case k < 32:
-              total += price;
-              singles += price*.33;
-              storeCredit += price*.3;
-              cash += price*.2;
+              lineTotal += price;
+              lineSingles += price*.33;
+              lineStoreCredit += price*.3;
+              lineCash += price*.2;
               break;
             default:
-              total += price;
-              singles += price*.2;
-              storeCredit += price*.2;
-              cash += price*.15;
+              lineTotal += price;
+              lineSingles += price*.2;
+              lineStoreCredit += price*.2;
+              lineCash += price*.15;
           }
         }
+        total += lineTotal;
+        singles += lineSingles;
+        storeCredit += lineStoreCredit;
+        cash += lineCash;
+        $(rows[i]).children(".trade-val").html(`
+          <span>Singles: <strong>$${(Math.round(lineSingles*100/j)/100).toFixed(2)}</strong></span>
+          <span>Store Credit: <strong>$${(Math.round(lineStoreCredit*100/j)/100).toFixed(2)}</strong></span>
+          <span>Cash: <strong>$${(Math.round(lineCash*100/j)/100).toFixed(2)}</strong></span>
+        `);
       }
       $("#sale-amt").html("$"+(Math.round(total*100)/100).toFixed(2));
       $("#singles-amt").html("$"+(Math.round(singles*100)/100).toFixed(2));
