@@ -58,7 +58,7 @@
       break;
     case 'search':
       $str = "%".$data['str']."%";
-      $sql = "SELECT cl.products_id, pd.products_name, s.pb_code, p.products_image, cl.is_foil
+      $sql = "SELECT cl.products_id, pd.products_name, s.pb_code, s.set_name, p.products_image, cl.is_foil
               FROM mtg_card_link cl
               LEFT JOIN products p ON cl.products_id = p.products_id
               LEFT JOIN products_description pd ON cl.products_id = pd.products_id
@@ -68,7 +68,7 @@
       $stmt = $conn->prepare($sql);
       $stmt->bind_param("s", $str);
       $stmt->execute();
-      $stmt->bind_result($prodId, $prodName, $setCode, $prodImg, $isFoil);
+      $stmt->bind_result($prodId, $prodName, $setCode, $setName, $prodImg, $isFoil);
       $stmt->store_result();
       if($stmt->num_rows > 0){
         $return['status'] = 'ok';
@@ -77,6 +77,7 @@
             'prodId' => $prodId,
             'prodName' => $prodName,
             'setCode' => $setCode,
+            'setName' => $setName,
             'prodImg' => $prodImg,
             'isFoil' => $isFoil
           );

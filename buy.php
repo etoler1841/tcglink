@@ -129,7 +129,7 @@
 
     #search-results .search-result {
       display: flex;
-      flex-wrap: wrap;
+      flex-flow: row nowrap;
       align-items: center;
       align-content: stretch;
       padding: 10px;
@@ -138,11 +138,29 @@
       border-bottom: solid 1px #999;
     }
 
-    #search-results .search-result img {
+    #search-results .search-result .card-img {
       height: 100%;
       width: auto;
       float: left;
       margin-right: 5px;
+    }
+
+    #search-results .search-result .info {
+      display: flex;
+      flex-flow: column nowrap;
+      justify-content: flex-start;
+      align-items: flex-start;
+      align-content: flex-start;
+    }
+
+    #search-results .search-result .set {
+      font-style: italic;
+      color: #999;
+    }
+
+    #search-results .search-result .set .set-img {
+      height: 20px;
+      width: auto;
     }
 
     #search-results .search-result.highlight {
@@ -261,10 +279,17 @@
           $("#search-results").show();
           $("#search-results").html('');
           for(card of data.cards){
+            console.log(card);
             $("#search-results").append(`
               <div class='search-result' id='res_${card.prodId}'>
-                <img src='../../images/${card.prodImg}' onerror='this.style.display="none"' />
-                <span class='card-name'>${card.prodName} [${card.setCode}]</span>
+                <img src='<?=$imgPath?>/${card.prodImg}' onerror='this.style.display="none"' class='card-img' />
+                <span class='info'>
+                  <span class='card-name'>${card.prodName} [${card.setCode}]</span>
+                  <span class='set'>
+                    <img src='./img/${card.setCode}.jpg' onerror='this.style.display="none"' class='set-img' />
+                    ${card.setName}
+                  </span>
+                </span>
               </div>
             `);
           }
