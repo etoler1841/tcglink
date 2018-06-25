@@ -182,6 +182,37 @@
         'price' => number_format($price, 2)
       );
       break;
+    case 'delete':
+      $stmt = "DELETE FROM mtg_card_link WHERE products_id = ".$data['prodId'];
+      $conn->query($stmt);
+      if($conn->error){
+        $return['status'] = 'err';
+        $return['errors'][] = $conn->error;
+        break;
+      }
+      $stmt = "DELETE FROM products_to_categories WHERE products_id = ".$data['prodId'];
+      $conn->query($stmt);
+      if($conn->error){
+        $return['status'] = 'err';
+        $return['errors'][] = $conn->error;
+        break;
+      }
+      $stmt = "DELETE FROM products_description WHERE products_id = ".$data['prodId'];
+      $conn->query($stmt);
+      if($conn->error){
+        $return['status'] = 'err';
+        $return['errors'][] = $conn->error;
+        break;
+      }
+      $stmt = "DELETE FROM products WHERE products_id = ".$data['prodId'];
+      $conn->query($stmt);
+      if($conn->error){
+        $return['status'] = 'err';
+        $return['errors'][] = $conn->error;
+        break;
+      }
+      $return['status'] = 'ok';
+      break;
     case 'newImg':
       $stmt = "SELECT products_image
                FROM products

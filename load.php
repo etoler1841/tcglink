@@ -471,6 +471,23 @@
       $(".click-edit-field").parent().html("<span class='click-edit'>"+old+"</span>");
       return;
     }
+    if(val == 'del'){
+      let params = {
+        'method': 'delete',
+        'prodId': id
+      };
+      $.post("./load_ajax.php", JSON.stringify(params), (response) => {
+        let data = JSON.parse(response);
+        if(data.status == 'ok'){
+          $("#"+id).remove();
+        } else {
+          console.log(data.errors);
+          let old = $(".click-edit-field").attr("class").replace("click-edit-field val_", "");
+          $(".click-edit-field").parent().html("<span class='click-edit'>"+old+"</span>");
+        }
+      });
+      return;
+    }
     if(val == 'img'){
       let params = {
         'method': 'newImg',
