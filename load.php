@@ -85,7 +85,7 @@
         default:
           $data['cards'][$i]['update_status'] = 'ancient';
       }
-      $data['cards'][$i]['showcase_status'] = (($data['cards'][$i]['products_price'] < 2 && $row['is_standard'] != 1) || ($data['cards'][$i]['products_price'] < 1 && $row['is_standard'] == 1)) ? 'box' : 'showcase' ;
+      $data['cards'][$i]['showcase_status'] = ($data['cards'][$i]['products_price'] < 2) ? 'box' : 'showcase' ;
       $data['cards'][$i]['qty']['bayou'] = $row['products_quantity'];
       $data['cards'][$i]['qty']['nine-mile'] = ($row['product_stock']) ? $row['product_stock'] : 0 ;
       $i++;
