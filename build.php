@@ -61,7 +61,8 @@
                          products_quantity_mixed = 1,
                          master_categories_id = $catId,
                          img_update = 1,
-                         products_full_name = '$cardName'";
+                         products_full_name = '$cardName',
+                         live_update = 1";
             $conn->query($stmt);
             $prodId = $conn->insert_id;
             $return['result']['prodId'] = $prodId;
@@ -124,7 +125,8 @@
                              products_quantity_mixed = 1,
                              master_categories_id = $catId,
                              img_update = 1,
-                             products_full_name = '$cardName'";
+                             products_full_name = '$cardName',
+                             live_update = 1";
                 $conn->query($stmt);
                 $prodId = $conn->insert_id;
                 $return['result']['prodId_foil'] = $prodId;
