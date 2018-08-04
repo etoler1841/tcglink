@@ -55,26 +55,34 @@
     $error = 1;
     foreach($data->results as $price){
       if($price->subTypeName == $cond){
-        if($price->midPrice > $price->marketPrice*1.33 || ($price->marketPrice > 150 && $price->midPrice && $price->marketPrice < $price->midPrice)){
-          $error = 0;
-          if($price->midPrice < .22 && $cond == 'Normal'){
-            $newPrice = .2200;
-          } elseif($price->midPrice < .5 && $cond == 'Foil'){
-            $newPrice = .5000;
-          } else {
-            $newPrice = number_format($price->midPrice, 4, '.', '');
-          }
+        // if($price->midPrice > $price->marketPrice*1.33 || ($price->marketPrice > 150 && $price->midPrice && $price->marketPrice < $price->midPrice)){
+        //   $error = 0;
+        //   if($price->midPrice < .22 && $cond == 'Normal'){
+        //     $newPrice = .2200;
+        //   } elseif($price->midPrice < .5 && $cond == 'Foil'){
+        //     $newPrice = .5000;
+        //   } else {
+        //     $newPrice = number_format($price->midPrice, 4, '.', '');
+        //   }
+        // } else {
+        //   if($price->marketPrice){
+        //     $error = 0;
+        //     if($price->marketPrice < .22 && $cond == 'Normal'){
+        //       $newPrice = .2200;
+        //     } elseif($price->marketPrice < .5 && $cond == 'Foil'){
+        //       $newPrice = .5000;
+        //     } else {
+        //       $newPrice = number_format($price->marketPrice, 4, '.', '');
+        //     }
+        //   }
+        // }
+        $error = 0;
+        if($price->midPrice < .22 && $cond == 'Normal'){
+          $newPrice = .2200;
+        } elseif($price->midPrice < .5 && $cond == 'Foil'){
+          $newPrice = .5000;
         } else {
-          if($price->marketPrice){
-            $error = 0;
-            if($price->marketPrice < .22 && $cond == 'Normal'){
-              $newPrice = .2200;
-            } elseif($price->marketPrice < .5 && $cond == 'Foil'){
-              $newPrice = .5000;
-            } else {
-              $newPrice = number_format($price->marketPrice, 4, '.', '');
-            }
-          }
+          $newPrice = number_format($price->midPrice, 4, '.', '');
         }
         $stmt = "UPDATE products
                  SET products_price = $newPrice,
