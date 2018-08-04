@@ -92,6 +92,7 @@
             $newPrice = .5000;
           } else {
             $newPrice = number_format($price->midPrice, 4, '.', '');
+          }
         }
         $stmt = "UPDATE products
                  SET products_price = $newPrice,
