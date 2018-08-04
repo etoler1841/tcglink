@@ -77,12 +77,22 @@
         //   }
         // }
         $error = 0;
-        if($price->midPrice < .22 && $cond == 'Normal'){
-          $newPrice = .2200;
-        } elseif($price->midPrice < .5 && $cond == 'Foil'){
-          $newPrice = .5000;
-        } else {
-          $newPrice = number_format($price->midPrice, 4, '.', '');
+        if($price->marketPrice){
+          if($price->marketPrice < .22 && $cond == 'Normal'){
+            $newPrice = .2200;
+          } elseif($price->marketPrice < .5 && $cond == 'Foil'){
+            $newPrice = .5000;
+          } else {
+            $newPrice = number_format($price->marketPrice, 4, '.', '');
+          }
+        } elseif($price->midPrice) {
+          if($price->midPrice < .22 && $cond == 'Normal'){
+            $newPrice = .2200;
+          } elseif($price->midPrice < .5 && $cond == 'Foil'){
+            $newPrice = .5000;
+          } else {
+            $newPrice = number_format($price->midPrice, 4, '.', '');
+          }
         }
         $stmt = "UPDATE products
                  SET products_price = $newPrice,
