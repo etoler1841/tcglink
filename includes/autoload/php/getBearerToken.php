@@ -15,11 +15,13 @@
       );
       $fields = "grant_type=client_credentials&client_id=".$tcgCred['publicKey']."&client_secret=".$tcgCred['privateKey'];
 
-      curl_setopt($ch, CURLOPT_URL,"http://api.tcgplayer.com/token");
+      curl_setopt($ch, CURLOPT_URL,"https://api.tcgplayer.com/token");
       curl_setopt($ch, CURLOPT_POST, 1);
       curl_setopt($ch, CURLOPT_POSTFIELDS, $fields);
       curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
       curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+      curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+      curl_setopt($ch, CURLOPT_POSTREDIR, 1);
 
       $response = json_decode(curl_exec($ch));
       $token = $response->access_token;
